@@ -152,6 +152,7 @@ class SolarFieldOperationsWorkflowTest extends TestCase
                 'structure_inspection' => [
                     'condition' => 'stable_rigid',
                     'materials_used' => 'Hot Dip Galvanized Steel',
+                    'coating_condition' => 'good_galvanized',
                     'remarks' => 'Torque markings intact',
                 ],
                 'pcu_inspection' => [

@@ -132,9 +132,10 @@
                 4. Structure Inspection
             </h3>
             <div class="grid grid-cols-2 gap-3 text-xs">
-                <div><span class="text-slate-400 block text-[10px] uppercase font-semibold">Condition</span> <strong class="text-slate-800">{{ strtoupper(str_replace('_', ' ', $sections['structure_inspection']['condition'] ?? '—')) }}</strong></div>
+                <div><span class="text-slate-400 block text-[10px] uppercase font-semibold">Condition (Rigidity)</span> <strong class="text-slate-800">{{ strtoupper(str_replace('_', ' ', $sections['structure_inspection']['condition'] ?? '—')) }}</strong></div>
                 <div><span class="text-slate-400 block text-[10px] uppercase font-semibold">Materials Used</span> {{ $sections['structure_inspection']['materials_used'] ?? '—' }}</div>
-                <div class="col-span-2"><span class="text-slate-400 block text-[10px] uppercase font-semibold">Remarks</span> {{ $sections['structure_inspection']['remarks'] ?? 'No remarks' }}</div>
+                <div><span class="text-slate-400 block text-[10px] uppercase font-semibold">Condition (Coating / Fasteners)</span> <strong class="text-slate-800">{{ strtoupper(str_replace('_', ' ', $sections['structure_inspection']['coating_condition'] ?? '—')) }}</strong></div>
+                <div><span class="text-slate-400 block text-[10px] uppercase font-semibold">Remarks</span> {{ $sections['structure_inspection']['remarks'] ?? 'No remarks' }}</div>
             </div>
         </div>
 

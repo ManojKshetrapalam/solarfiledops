@@ -251,16 +251,15 @@
             <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-4">
                 <div class="border-b border-slate-100 pb-3">
                     <h3 class="text-sm font-bold text-slate-900">Step 4: Structure Inspection</h3>
-                    <p class="text-xs text-slate-500">Inspect mounting structure rigidity, materials, and fastener torque.</p>
+                    <p class="text-xs text-slate-500">Inspect mounting structure rigidity, materials, galvanizing, and fastener torque.</p>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Structure Condition *</label>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Structure Condition (Rigidity & Stability) *</label>
                     <select x-model="form.structure_inspection.condition"
                             class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white">
-                        <option value="stable_rigid">Stable & Rigid (No Corrosion)</option>
-                        <option value="mild_rust">Mild Surface Rust / Oxidation</option>
-                        <option value="loose_fasteners">Loose Fasteners / Bolts Detected</option>
+                        <option value="stable_rigid">Stable & Rigid (No Deflection)</option>
+                        <option value="mild_movement">Mild Structural Movement</option>
                         <option value="structurally_compromised">Structurally Compromised / Needs Reinforcement</option>
                     </select>
                 </div>
@@ -269,6 +268,17 @@
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Materials Used *</label>
                     <input type="text" x-model="form.structure_inspection.materials_used" placeholder="e.g. Hot Dip Galvanized Steel / Aluminium Rails"
                            class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Condition (Coating / Galvanizing / Fasteners) *</label>
+                    <select x-model="form.structure_inspection.coating_condition"
+                            class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white">
+                        <option value="good_galvanized">Good Galvanizing & Tight Fasteners (No Rust)</option>
+                        <option value="surface_oxidation">Surface Oxidation / Minor Paint Chipping</option>
+                        <option value="loose_fasteners">Loose Fasteners / Missing Washers Detected</option>
+                        <option value="corroded">Severe Corrosion / Grouting Damage</option>
+                    </select>
                 </div>
 
                 <div>
@@ -769,6 +779,7 @@ function reportWizard(config) {
             structure_inspection: {
                 condition: 'stable_rigid',
                 materials_used: 'Hot Dip Galvanized Steel',
+                coating_condition: 'good_galvanized',
                 remarks: '',
                 ...(config.initialSections.structure_inspection || {})
             },

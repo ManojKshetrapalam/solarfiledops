@@ -101,9 +101,10 @@
                 <h3 class="font-bold text-[11px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1 mb-1.5">
                     2. Structure Inspection
                 </h3>
-                <div class="grid grid-cols-3 gap-2">
-                    <div><span class="text-slate-500 block text-[10px]">Condition:</span> <strong>{{ strtoupper(str_replace('_', ' ', $sections['structure_inspection']['condition'] ?? '—')) }}</strong></div>
+                <div class="grid grid-cols-4 gap-2">
+                    <div><span class="text-slate-500 block text-[10px]">Condition (Rigidity):</span> <strong>{{ strtoupper(str_replace('_', ' ', $sections['structure_inspection']['condition'] ?? '—')) }}</strong></div>
                     <div><span class="text-slate-500 block text-[10px]">Materials Used:</span> <strong>{{ $sections['structure_inspection']['materials_used'] ?? '—' }}</strong></div>
+                    <div><span class="text-slate-500 block text-[10px]">Condition (Coating/Fasteners):</span> <strong>{{ strtoupper(str_replace('_', ' ', $sections['structure_inspection']['coating_condition'] ?? '—')) }}</strong></div>
                     <div><span class="text-slate-500 block text-[10px]">Remarks:</span> <span>{{ $sections['structure_inspection']['remarks'] ?? '—' }}</span></div>
                 </div>
             </div>

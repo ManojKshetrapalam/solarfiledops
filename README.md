@@ -193,10 +193,17 @@ php artisan test
 
 ---
 
-## Deployment Standards (Hostinger VPS / Production)
+## Deployment Standards (Hostinger Server / Production)
+- **Live URL**: `https://myworks.sbs/solar`
 - **Repository**: `https://github.com/ManojKshetrapalam/solarfiledops.git`
-- **Target Host**: Hostinger Server (`myworks.sbs` / `31.97.225.172`)
-- **Web Root**: `public/`
-- Set `APP_ENV=production` and `APP_DEBUG=false` in `.env`.
-- Run `php artisan config:cache`, `route:cache`, `view:cache`.
-- Symlink storage: `php artisan storage:link`.
+- **Server**: Hostinger Shared / LiteSpeed (`myworks.sbs` / `31.97.225.172:65002`)
+- **Directory**: `/home/u996219523/domains/myworks.sbs/public_html/solar`
+- **PHP CLI**: `/opt/alt/php84/usr/bin/php` (PHP 8.4)
+- **Database**: SQLite at `/home/u996219523/domains/myworks.sbs/public_html/solar/database/database.sqlite`
+- **Storage Symlink**: `public/storage` -> `storage/app/public`
+- **Subdirectory Entrypoint**: Root `.htaccess` rewrites to `index.php` and maps static assets to `public/`
+- **Production Credentials**:
+  - Admin: `admin@solar.local` / `password123`
+  - Engineer (Sun on Earth): `raj@solar.local` / `password123`
+  - Engineer (Sabha): `kiran@solar.local` / `password123`
+

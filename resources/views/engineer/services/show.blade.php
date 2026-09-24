@@ -1,9 +1,10 @@
 @extends('layouts.engineer')
 
 @section('mobile_title', 'Job #' . $service->service_number)
+@section('header_back_url', route('engineer.services.index'))
 
 @section('engineer_content')
-<div class="space-y-4">
+<div class="space-y-4 pb-32 sm:pb-36">
     <!-- Header Summary Card -->
     <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
         <div class="flex items-center justify-between mb-3">
@@ -26,6 +27,48 @@
         <p class="text-xs text-amber-600 font-semibold mt-0.5">
             Entity: {{ $service->company->name }} ({{ $service->company->code }})
         </p>
+
+        <!-- Quick Action Button in Top Card -->
+        <div class="mt-4 pt-3 border-t border-slate-100">
+            @if($service->status === 'assigned')
+                <form action="{{ route('engineer.services.start', $service->id) }}" method="POST">
+                    @csrf
+                    <button type="submit" 
+                            class="w-full py-3.5 px-4 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-slate-950 font-black text-xs rounded-xl shadow-md shadow-amber-500/20 flex items-center justify-center gap-2 transition-all">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>START SERVICE & OPEN REPORT</span>
+                    </button>
+                </form>
+            @elseif($service->status === 'in_progress' && $service->report)
+                <a href="{{ route('engineer.reports.edit', $service->report->id) }}" 
+                   class="w-full py-3.5 px-4 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-2 transition-all">
+                    <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <span>CONTINUE REPORT (Step {{ $service->report->current_step }} of 10) &rarr;</span>
+                </a>
+            @elseif($service->report && $service->report->status === 'correction_required')
+                <a href="{{ route('engineer.reports.edit', $service->report->id) }}" 
+                   class="w-full py-3.5 px-4 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-slate-950 font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-2 transition-all">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span>EDIT & RESUBMIT CORRECTION &rarr;</span>
+                </a>
+            @elseif($service->report)
+                <a href="{{ route('engineer.reports.show', $service->report->id) }}" 
+                   class="w-full py-3.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl border border-slate-200 flex items-center justify-center gap-2 transition-all">
+                    <svg class="w-4 h-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span>VIEW SUBMITTED REPORT &rarr;</span>
+                </a>
+            @endif
+        </div>
 
         <div class="mt-4 pt-4 border-t border-slate-100 space-y-2 text-xs">
             <div>
@@ -97,7 +140,7 @@
     </div>
 
     <!-- Main Action Button -->
-    <div class="pt-2">
+    <div class="pt-4 pb-16">
         @if($service->status === 'assigned')
             <form action="{{ route('engineer.services.start', $service->id) }}" method="POST">
                 @csrf

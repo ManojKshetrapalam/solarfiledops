@@ -1,6 +1,8 @@
 @extends('layouts.engineer')
 
-@section('mobile_title', 'Fill Service Report')
+@section('mobile_title', 'Report ' . $report->report_number)
+@section('header_back_url', route('engineer.services.show', $report->service_id))
+@section('hide_bottom_nav', 'true')
 
 @section('engineer_content')
 <div x-data="reportWizard({
@@ -20,7 +22,7 @@
             'caption' => $p->caption ?? '',
         ])) }}
     })"
-    class="pb-24">
+    class="pb-36 sm:pb-40">
 
     <!-- Top Sticky Progress Bar & Step Header -->
     <div class="sticky top-14 z-30 bg-slate-900 text-white -mx-4 px-4 py-2.5 shadow-md border-b border-slate-800">
@@ -80,16 +82,16 @@
                               class="w-full mt-2 px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 text-xs font-medium"></textarea>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Service Date *</label>
                         <input type="date" x-model="form.customer_details.service_date"
-                               class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                               class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Service Time *</label>
                         <input type="time" x-model="form.customer_details.service_time"
-                               class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                               class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     </div>
                 </div>
 
@@ -664,7 +666,8 @@
     </form>
 
     <!-- Bottom Sticky Navigation Toolbar -->
-    <div class="fixed bottom-14 inset-x-0 z-40 bg-white border-t border-slate-200 p-3 shadow-lg max-w-lg mx-auto">
+    <div class="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 shadow-2xl max-w-lg mx-auto"
+         style="padding-bottom: max(env(safe-area-inset-bottom, 0px), 12px);">
         <div class="flex items-center justify-between gap-2">
             <!-- Previous Button -->
             <button type="button" @click="prevStep()" :disabled="currentStep === 1"

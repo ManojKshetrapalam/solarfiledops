@@ -1,9 +1,10 @@
 @extends('layouts.engineer')
 
 @section('mobile_title', 'Report #' . $report->report_number)
+@section('header_back_url', route('engineer.reports.index'))
 
 @section('engineer_content')
-<div class="space-y-4 pb-12">
+<div class="space-y-4 pb-32 sm:pb-36">
     <!-- Header Card -->
     <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
         <div class="flex items-center justify-between mb-2">

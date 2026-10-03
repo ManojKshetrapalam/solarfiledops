@@ -666,13 +666,13 @@
                     </div>
                 </div>
 
-                <!-- Client Work Acceptance Confirmation -->
+                <!-- Work Acceptance Confirmation -->
                 <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
                     <div class="flex items-start gap-3">
                         <input type="checkbox" id="client_confirmed" x-model="form.remarks.client_confirmed"
                                class="mt-0.5 w-5 h-5 rounded border-slate-300 text-amber-600 focus:ring-amber-500 cursor-pointer shrink-0">
                         <label for="client_confirmed" class="text-xs text-slate-800 leading-snug cursor-pointer select-none">
-                            <strong class="block text-slate-900 text-xs font-bold mb-0.5">Client Work Acceptance Confirmation *</strong>
+                            <strong class="block text-slate-900 text-xs font-bold mb-0.5">Work Acceptance Confirmation *</strong>
                             I confirm that I have inspected and viewed the solar service / maintenance work completed on site and acknowledge it has been carried out satisfactorily.
                         </label>
                     </div>
@@ -708,16 +708,23 @@
                     </div>
 
                     <!-- Canvas Signature Box -->
-                    <div class="relative bg-white rounded-xl border-2 border-dashed border-slate-300 overflow-hidden shadow-inner" style="height: 150px; touch-action: none;">
-                        <canvas id="signaturePad" class="w-full h-full block cursor-crosshair" style="touch-action: none;"></canvas>
-                        
-                        <!-- Placeholder instruction when empty -->
-                        <div x-show="!hasSignature" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-400 select-none">
+                    <div class="relative bg-white rounded-xl border-2 border-dashed border-slate-300 overflow-hidden shadow-inner" style="height: 160px; touch-action: none;">
+                        <!-- Placeholder instruction behind canvas (z-0) -->
+                        <div x-show="!hasSignature" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-400 select-none z-0">
                             <svg class="w-6 h-6 mb-1 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                             </svg>
                             <span class="text-xs font-medium">Draw client signature here</span>
                         </div>
+
+                        <!-- Canvas in front (z-10) with direct pointer & touch bindings -->
+                        <canvas id="signaturePad"
+                                @pointerdown="sigStart($event)"
+                                @pointermove="sigMove($event)"
+                                @pointerup="sigEnd($event)"
+                                @pointercancel="sigEnd($event)"
+                                class="w-full h-full block cursor-crosshair relative z-10 bg-transparent"
+                                style="touch-action: none;"></canvas>
                     </div>
 
                     <!-- Signature Status Indicator -->
@@ -954,19 +961,29 @@ function reportWizard(config) {
             this.$watch('currentStep', (val) => {
                 if (val === 10) {
                     this.$nextTick(() => {
-                        this.initSignaturePad();
+                        this.setupCanvas();
                     });
                 }
             });
 
             if (this.currentStep === 10) {
                 this.$nextTick(() => {
-                    this.initSignaturePad();
+                    this.setupCanvas();
                 });
             }
+
+            window.addEventListener('resize', () => {
+                if (this.currentStep === 10) {
+                    this.setupCanvas();
+                }
+            });
         },
 
-        initSignaturePad() {
+        sigDrawing: false,
+        sigLastX: 0,
+        sigLastY: 0,
+
+        setupCanvas() {
             const canvas = document.getElementById('signaturePad');
             if (!canvas) return;
 
@@ -974,104 +991,120 @@ function reportWizard(config) {
             if (rect.width === 0 || rect.height === 0) return;
 
             const dpr = window.devicePixelRatio || 1;
-            const targetWidth = Math.floor(rect.width * dpr);
-            const targetHeight = Math.floor(rect.height * dpr);
-            const ctx = canvas.getContext('2d');
+            const targetW = Math.round(rect.width * dpr);
+            const targetH = Math.round(rect.height * dpr);
 
-            if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
-                canvas.width = targetWidth;
-                canvas.height = targetHeight;
-                ctx.scale(dpr, dpr);
-                ctx.strokeStyle = '#0f172a';
-                ctx.lineWidth = 2.5;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
+            if (canvas.width !== targetW || canvas.height !== targetH) {
+                const existingData = this.form.remarks.client_signature;
+                canvas.width = targetW;
+                canvas.height = targetH;
+                const ctx = canvas.getContext('2d');
 
-                if (this.form.remarks.client_signature && this.form.remarks.client_signature.startsWith('data:image')) {
+                if (existingData && existingData.startsWith('data:image')) {
                     const img = new Image();
                     img.onload = () => {
-                        ctx.drawImage(img, 0, 0, rect.width, rect.height);
+                        ctx.drawImage(img, 0, 0, targetW, targetH);
                         this.hasSignature = true;
                     };
-                    img.src = this.form.remarks.client_signature;
+                    img.src = existingData;
                 }
             } else if (this.form.remarks.client_signature && !this.hasSignature) {
-                ctx.strokeStyle = '#0f172a';
-                ctx.lineWidth = 2.5;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
+                const ctx = canvas.getContext('2d');
                 const img = new Image();
                 img.onload = () => {
-                    ctx.drawImage(img, 0, 0, rect.width, rect.height);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     this.hasSignature = true;
                 };
                 img.src = this.form.remarks.client_signature;
             }
+        },
 
-            if (this._sigPadInitialized) return;
-            this._sigPadInitialized = true;
-
-            let isDrawing = false;
-            let lastX = 0;
-            let lastY = 0;
-
-            const getPos = (e) => {
-                const r = canvas.getBoundingClientRect();
-                const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
-                const clientY = (e.touches && e.touches.length > 0) ? e.touches[0].clientY : e.clientY;
-                return {
-                    x: clientX - r.left,
-                    y: clientY - r.top
-                };
+        getSigPos(e, canvas) {
+            const rect = canvas.getBoundingClientRect();
+            let clientX = e.clientX;
+            let clientY = e.clientY;
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else if (e.changedTouches && e.changedTouches.length > 0) {
+                clientX = e.changedTouches[0].clientX;
+                clientY = e.changedTouches[0].clientY;
+            }
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
             };
+        },
 
-            const startDraw = (e) => {
-                if (e.cancelable) e.preventDefault();
-                isDrawing = true;
-                const pos = getPos(e);
-                lastX = pos.x;
-                lastY = pos.y;
-            };
+        sigStart(e) {
+            if (e.button !== undefined && e.button !== 0) return;
+            if (this.sigDrawing && e.type === 'touchstart') return;
+            if (e.cancelable) e.preventDefault();
+            const canvas = document.getElementById('signaturePad') || e.target;
+            this.setupCanvas();
 
-            const draw = (e) => {
-                if (!isDrawing) return;
-                if (e.cancelable) e.preventDefault();
-                const pos = getPos(e);
-                ctx.beginPath();
-                ctx.moveTo(lastX, lastY);
-                ctx.lineTo(pos.x, pos.y);
-                ctx.stroke();
-                lastX = pos.x;
-                lastY = pos.y;
-                this.hasSignature = true;
-            };
+            if (canvas.setPointerCapture && e.pointerId !== undefined) {
+                try { canvas.setPointerCapture(e.pointerId); } catch(err) {}
+            }
 
-            const stopDraw = () => {
-                if (!isDrawing) return;
-                isDrawing = false;
-                this.form.remarks.client_signature = canvas.toDataURL('image/png');
-                this.form.remarks.client_signed_at = new Date().toISOString();
-                this.hasSignature = true;
-                this.saveDraft(true);
-            };
+            this.sigDrawing = true;
+            const pos = this.getSigPos(e, canvas);
+            this.sigLastX = pos.x;
+            this.sigLastY = pos.y;
 
-            canvas.addEventListener('touchstart', startDraw, { passive: false });
-            canvas.addEventListener('touchmove', draw, { passive: false });
-            canvas.addEventListener('touchend', stopDraw, { passive: false });
-            canvas.addEventListener('touchcancel', stopDraw, { passive: false });
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, 1.8 * dpr, 0, Math.PI * 2);
+            ctx.fillStyle = '#0f172a';
+            ctx.fill();
 
-            canvas.addEventListener('mousedown', startDraw);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDraw);
-            canvas.addEventListener('mouseleave', stopDraw);
+            this.hasSignature = true;
+        },
+
+        sigMove(e) {
+            if (!this.sigDrawing) return;
+            if (e.cancelable) e.preventDefault();
+            const canvas = document.getElementById('signaturePad') || e.target;
+            const pos = this.getSigPos(e, canvas);
+
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            ctx.beginPath();
+            ctx.moveTo(this.sigLastX, this.sigLastY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 3 * dpr;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+
+            this.sigLastX = pos.x;
+            this.sigLastY = pos.y;
+            this.hasSignature = true;
+        },
+
+        sigEnd(e) {
+            if (!this.sigDrawing) return;
+            this.sigDrawing = false;
+            const canvas = document.getElementById('signaturePad') || e.target;
+            if (canvas.releasePointerCapture && e.pointerId !== undefined) {
+                try { canvas.releasePointerCapture(e.pointerId); } catch(err) {}
+            }
+
+            this.form.remarks.client_signature = canvas.toDataURL('image/png');
+            this.form.remarks.client_signed_at = new Date().toISOString();
+            this.hasSignature = true;
+            this.saveDraft(true);
         },
 
         clearSignature() {
             const canvas = document.getElementById('signaturePad');
             if (canvas) {
                 const ctx = canvas.getContext('2d');
-                const dpr = window.devicePixelRatio || 1;
-                ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
             this.form.remarks.client_signature = '';
             this.form.remarks.client_signed_at = '';

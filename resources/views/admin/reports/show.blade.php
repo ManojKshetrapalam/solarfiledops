@@ -205,14 +205,31 @@
                 <div class="grid grid-cols-2 gap-3 pt-2">
                     <div>
                         <span class="text-slate-400 block text-[10px] uppercase font-semibold">Service Done By</span>
-                        <strong class="text-slate-900">{{ $report->engineer->name }}</strong>
+                        <strong class="text-slate-900 block">{{ $report->engineer->name }}</strong>
                         <span class="text-slate-400 block text-[11px]">{{ $report->engineer->employee_code }}</span>
                     </div>
                     <div>
                         <span class="text-slate-400 block text-[10px] uppercase font-semibold">Checked By (Client)</span>
-                        <strong class="text-slate-900">{{ $sections['remarks']['checked_by_name'] ?? 'Pending' }}</strong>
+                        <strong class="text-slate-900 block">{{ $sections['remarks']['checked_by_name'] ?? 'Pending' }}</strong>
                         <span class="text-slate-400 block text-[11px]">{{ $sections['remarks']['checked_by_phone'] ?? '—' }}</span>
+                        @if(!empty($sections['remarks']['client_confirmed']))
+                            <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 mt-1">
+                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Work Verified & Accepted
+                            </span>
+                        @endif
                     </div>
+
+                    @if(!empty($sections['remarks']['client_signature']))
+                        <div class="col-span-2 pt-2 border-t border-slate-100">
+                            <span class="text-slate-400 block text-[10px] uppercase font-semibold mb-1">Client Digital Signature</span>
+                            <div class="bg-slate-50 p-2 rounded-lg border border-slate-200 inline-block">
+                                <img src="{{ $sections['remarks']['client_signature'] }}" alt="Client Digital Signature" class="max-h-16 object-contain bg-white rounded px-2 py-1 border border-slate-100">
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

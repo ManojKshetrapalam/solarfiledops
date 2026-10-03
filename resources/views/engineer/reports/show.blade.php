@@ -142,20 +142,40 @@
         </div>
 
         <!-- 8. Signatures & Sign-off -->
-        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs">
-            <h3 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider mb-2 border-b pb-1">Sign-Off & Verifications</h3>
-            <div class="grid grid-cols-2 gap-2 text-slate-700">
+        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs space-y-3">
+            <div class="flex items-center justify-between border-b pb-1.5">
+                <h3 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider">Sign-Off & Verifications</h3>
+                @if(!empty($sections['remarks']['client_confirmed']))
+                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Work Verified by Client
+                    </span>
+                @endif
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-slate-700">
                 <div>
-                    <span class="text-slate-400 block text-[10px]">Service Done By</span>
-                    <strong class="text-slate-900">{{ $report->engineer->name }}</strong>
+                    <span class="text-slate-400 block text-[10px] uppercase font-semibold">Service Done By</span>
+                    <strong class="text-slate-900 block text-xs">{{ $report->engineer->name }}</strong>
                     <span class="block text-slate-400 text-[10px]">{{ $report->engineer->designation }}</span>
                 </div>
                 <div>
-                    <span class="text-slate-400 block text-[10px]">Checked By</span>
-                    <strong class="text-slate-900">{{ $sections['remarks']['checked_by_name'] ?? 'Pending' }}</strong>
+                    <span class="text-slate-400 block text-[10px] uppercase font-semibold">Checked By (Client)</span>
+                    <strong class="text-slate-900 block text-xs">{{ $sections['remarks']['checked_by_name'] ?? 'Pending' }}</strong>
                     <span class="block text-slate-400 text-[10px]">{{ $sections['remarks']['checked_by_phone'] ?? '—' }}</span>
                 </div>
             </div>
+
+            @if(!empty($sections['remarks']['client_signature']))
+                <div class="pt-2 border-t border-slate-100">
+                    <span class="text-slate-400 block text-[10px] uppercase font-semibold mb-1">Client Digital Signature</span>
+                    <div class="bg-slate-50 rounded-lg p-2 border border-slate-200 inline-block max-w-full">
+                        <img src="{{ $sections['remarks']['client_signature'] }}" alt="Client Digital Signature" class="max-h-16 object-contain bg-white rounded border border-slate-200 px-3 py-1">
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 </div>

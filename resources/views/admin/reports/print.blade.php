@@ -199,9 +199,15 @@
         <!-- Checked By -->
         <div class="p-3 flex flex-col justify-between h-28">
             <span class="font-bold text-[10px] uppercase text-slate-500">Checked By (Client)</span>
-            <div class="my-auto">
-                <p class="font-bold text-sm text-slate-900">{{ $sections['remarks']['checked_by_name'] ?? '—' }}</p>
-                <p class="text-[10px] text-slate-500">Phone: {{ $sections['remarks']['checked_by_phone'] ?? '—' }}</p>
+            <div class="my-auto text-center">
+                @if(!empty($sections['remarks']['client_signature']))
+                    <img src="{{ $sections['remarks']['client_signature'] }}" alt="Client Signature" class="max-h-9 object-contain mx-auto mb-0.5">
+                @endif
+                <p class="font-bold text-xs text-slate-900 leading-tight">{{ $sections['remarks']['checked_by_name'] ?? '—' }}</p>
+                <p class="text-[9px] text-slate-500">Phone: {{ $sections['remarks']['checked_by_phone'] ?? '—' }}</p>
+                @if(!empty($sections['remarks']['client_confirmed']))
+                    <p class="text-[8px] text-emerald-700 font-semibold">(Work Inspected & Verified)</p>
+                @endif
             </div>
             <span class="text-[9px] text-slate-400 border-t pt-0.5">Client Signature & Seal</span>
         </div>

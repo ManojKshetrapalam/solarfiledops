@@ -187,6 +187,8 @@ class SolarFieldOperationsWorkflowTest extends TestCase
                     'checked_by_name' => 'Suresh Plant Incharge',
                     'checked_by_phone' => '+91 94444 22222',
                     'checked_by_notes' => 'Work completed satisfactorily.',
+                    'client_confirmed' => true,
+                    'client_signature' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
                 ],
             ],
         ]);
@@ -220,6 +222,10 @@ class SolarFieldOperationsWorkflowTest extends TestCase
         $this->assertEquals('submitted', $report->status);
         $this->assertEquals('report_submitted', $service->status);
 
+        $engineerShowView = $this->get(route('engineer.reports.show', $report->id));
+        $engineerShowView->assertSee('Work Verified by Client');
+        $engineerShowView->assertSee('Client Digital Signature');
+
         // 16. Admin receives notification.
         $this->assertDatabaseHas('notifications', [
             'user_id' => $admin->id,
@@ -232,6 +238,8 @@ class SolarFieldOperationsWorkflowTest extends TestCase
         $adminReviewView->assertStatus(200);
         $adminReviewView->assertSee('18.4 A');
         $adminReviewView->assertSee('cleaning_evidence.jpg');
+        $adminReviewView->assertSee('Work Verified');
+        $adminReviewView->assertSee('Client Digital Signature');
 
         // 18. Admin requests correction with mandatory reason.
         $corrResponse = $this->post(route('admin.reports.request-correction', $report->id), [

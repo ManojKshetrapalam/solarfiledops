@@ -543,6 +543,18 @@
                         <input type="text" x-model="form.remarks.checked_by_notes" placeholder="e.g. System tested and found in full working order"
                                class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     </div>
+
+                    <div class="pt-2 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500">
+                        <span class="flex items-center gap-1 text-[11px]">
+                            <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Client confirmation & signature pad will be presented on Step 10.
+                        </span>
+                        <span x-show="hasSignature" class="text-emerald-700 font-bold shrink-0">
+                            Signed &check;
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -642,7 +654,89 @@
                     <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
                         <span class="font-bold text-slate-900 block mb-1">6. Checked & Sign-off</span>
                         <p class="text-slate-600">Representative: <strong class="text-slate-800" x-text="form.remarks.checked_by_name || 'Pending'"></strong> (<span x-text="form.remarks.checked_by_phone || '—'"></span>)</p>
+                        <p class="text-slate-600">Work Acceptance: 
+                            <span :class="form.remarks.client_confirmed ? 'text-emerald-700 font-bold' : 'text-amber-600 font-semibold'"
+                                  x-text="form.remarks.client_confirmed ? 'Confirmed by Client ✓' : 'Pending confirmation'"></span>
+                        </p>
+                        <p class="text-slate-600">Client Signature: 
+                            <span :class="hasSignature ? 'text-emerald-700 font-bold' : 'text-slate-400 font-medium'"
+                                  x-text="hasSignature ? 'Captured ✓' : 'Awaiting signature'"></span>
+                        </p>
                         <p class="text-slate-600">Photos Uploaded: <strong class="text-amber-600" x-text="photos.length + ' photos attached'"></strong></p>
+                    </div>
+                </div>
+
+                <!-- Client Work Acceptance Confirmation -->
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                    <div class="flex items-start gap-3">
+                        <input type="checkbox" id="client_confirmed" x-model="form.remarks.client_confirmed"
+                               class="mt-0.5 w-5 h-5 rounded border-slate-300 text-amber-600 focus:ring-amber-500 cursor-pointer shrink-0">
+                        <label for="client_confirmed" class="text-xs text-slate-800 leading-snug cursor-pointer select-none">
+                            <strong class="block text-slate-900 text-xs font-bold mb-0.5">Client Work Acceptance Confirmation *</strong>
+                            I confirm that I have inspected and viewed the solar service / maintenance work completed on site and acknowledge it has been carried out satisfactorily.
+                        </label>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-slate-200">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Client / Representative Name *</label>
+                            <input type="text" x-model="form.remarks.checked_by_name" placeholder="e.g. Suresh Kumar"
+                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Phone Number *</label>
+                            <input type="tel" x-model="form.remarks.checked_by_phone" placeholder="e.g. +91 94444 22222"
+                                   class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Client Touch Signature Pad -->
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="block font-bold text-slate-900 text-xs uppercase tracking-wider">Client Digital Signature</span>
+                            <p class="text-[11px] text-slate-500">Sign with finger or stylus on the screen below</p>
+                        </div>
+                        <button type="button" @click="clearSignature()" 
+                                class="px-2.5 py-1 text-[11px] font-semibold text-slate-600 bg-white hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors flex items-center gap-1 shadow-xs">
+                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Clear
+                        </button>
+                    </div>
+
+                    <!-- Canvas Signature Box -->
+                    <div class="relative bg-white rounded-xl border-2 border-dashed border-slate-300 overflow-hidden shadow-inner" style="height: 150px; touch-action: none;">
+                        <canvas id="signaturePad" class="w-full h-full block cursor-crosshair" style="touch-action: none;"></canvas>
+                        
+                        <!-- Placeholder instruction when empty -->
+                        <div x-show="!hasSignature" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-400 select-none">
+                            <svg class="w-6 h-6 mb-1 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                            <span class="text-xs font-medium">Draw client signature here</span>
+                        </div>
+                    </div>
+
+                    <!-- Signature Status Indicator -->
+                    <div class="flex items-center justify-between text-[11px] pt-0.5">
+                        <span x-show="hasSignature" class="text-emerald-700 font-semibold flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Signature Captured
+                        </span>
+                        <span x-show="!hasSignature" class="text-amber-700 font-medium flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            Awaiting client signature
+                        </span>
+                        <span class="text-[10px] text-slate-400" x-show="form.remarks.client_signed_at">
+                            Captured on mobile
+                        </span>
                     </div>
                 </div>
 
@@ -712,6 +806,16 @@
             <div>
                 <h3 class="text-base font-bold text-slate-900">Submit Service Report?</h3>
                 <p class="text-xs text-slate-500 mt-1">Are you sure you want to submit this report? It will be sent to the administrator for review.</p>
+                <div x-show="!form.remarks.client_confirmed || !hasSignature" class="mt-2.5 p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 text-left space-y-1">
+                    <span class="font-bold flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Sign-off Checklist Note:
+                    </span>
+                    <p x-show="!form.remarks.client_confirmed" class="text-amber-800">&bull; Client work acceptance checkbox is unchecked.</p>
+                    <p x-show="!hasSignature" class="text-amber-800">&bull; Client digital signature has not been drawn.</p>
+                </div>
             </div>
             <div class="flex items-center gap-2 pt-2">
                 <button type="button" @click="showConfirmModal = false" class="flex-1 py-2.5 px-4 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50">
@@ -738,6 +842,8 @@ function reportWizard(config) {
         saveStatusColor: 'text-slate-400',
         uploadCategory: 'general',
         photos: config.existingPhotos || [],
+        hasSignature: false,
+        _sigPadInitialized: false,
 
         stepTitles: [
             '1. Customer Details',
@@ -821,6 +927,9 @@ function reportWizard(config) {
                 checked_by_name: '',
                 checked_by_phone: '',
                 checked_by_notes: '',
+                client_confirmed: false,
+                client_signature: '',
+                client_signed_at: '',
                 ...(config.initialSections.remarks || {})
             }
         },
@@ -837,6 +946,137 @@ function reportWizard(config) {
                     }
                 } catch(e) {}
             }
+
+            if (this.form.remarks && this.form.remarks.client_signature) {
+                this.hasSignature = true;
+            }
+
+            this.$watch('currentStep', (val) => {
+                if (val === 10) {
+                    this.$nextTick(() => {
+                        this.initSignaturePad();
+                    });
+                }
+            });
+
+            if (this.currentStep === 10) {
+                this.$nextTick(() => {
+                    this.initSignaturePad();
+                });
+            }
+        },
+
+        initSignaturePad() {
+            const canvas = document.getElementById('signaturePad');
+            if (!canvas) return;
+
+            const rect = canvas.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+
+            const dpr = window.devicePixelRatio || 1;
+            const targetWidth = Math.floor(rect.width * dpr);
+            const targetHeight = Math.floor(rect.height * dpr);
+            const ctx = canvas.getContext('2d');
+
+            if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+                canvas.width = targetWidth;
+                canvas.height = targetHeight;
+                ctx.scale(dpr, dpr);
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                if (this.form.remarks.client_signature && this.form.remarks.client_signature.startsWith('data:image')) {
+                    const img = new Image();
+                    img.onload = () => {
+                        ctx.drawImage(img, 0, 0, rect.width, rect.height);
+                        this.hasSignature = true;
+                    };
+                    img.src = this.form.remarks.client_signature;
+                }
+            } else if (this.form.remarks.client_signature && !this.hasSignature) {
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                const img = new Image();
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0, rect.width, rect.height);
+                    this.hasSignature = true;
+                };
+                img.src = this.form.remarks.client_signature;
+            }
+
+            if (this._sigPadInitialized) return;
+            this._sigPadInitialized = true;
+
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+
+            const getPos = (e) => {
+                const r = canvas.getBoundingClientRect();
+                const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
+                const clientY = (e.touches && e.touches.length > 0) ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: clientX - r.left,
+                    y: clientY - r.top
+                };
+            };
+
+            const startDraw = (e) => {
+                if (e.cancelable) e.preventDefault();
+                isDrawing = true;
+                const pos = getPos(e);
+                lastX = pos.x;
+                lastY = pos.y;
+            };
+
+            const draw = (e) => {
+                if (!isDrawing) return;
+                if (e.cancelable) e.preventDefault();
+                const pos = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                lastX = pos.x;
+                lastY = pos.y;
+                this.hasSignature = true;
+            };
+
+            const stopDraw = () => {
+                if (!isDrawing) return;
+                isDrawing = false;
+                this.form.remarks.client_signature = canvas.toDataURL('image/png');
+                this.form.remarks.client_signed_at = new Date().toISOString();
+                this.hasSignature = true;
+                this.saveDraft(true);
+            };
+
+            canvas.addEventListener('touchstart', startDraw, { passive: false });
+            canvas.addEventListener('touchmove', draw, { passive: false });
+            canvas.addEventListener('touchend', stopDraw, { passive: false });
+            canvas.addEventListener('touchcancel', stopDraw, { passive: false });
+
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDraw);
+            canvas.addEventListener('mouseleave', stopDraw);
+        },
+
+        clearSignature() {
+            const canvas = document.getElementById('signaturePad');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                const dpr = window.devicePixelRatio || 1;
+                ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+            }
+            this.form.remarks.client_signature = '';
+            this.form.remarks.client_signed_at = '';
+            this.hasSignature = false;
+            this.saveDraft(true);
         },
 
         getPhotosBySection(sectionKey) {

@@ -13,20 +13,17 @@
     </style>
 </head>
 <body class="bg-white text-slate-900 text-xs p-6 max-w-4xl mx-auto font-sans leading-tight">
-    <!-- Print toolbar -->
-    <div class="no-print mb-6 p-4 bg-slate-900 text-white rounded-xl flex items-center justify-between shadow-lg">
-        <div>
-            <h2 class="font-bold text-sm">Official Service Report: {{ $report->report_number }}</h2>
-            <p class="text-xs text-slate-400">Click Print to print or save as PDF via your browser.</p>
-        </div>
-        <div class="flex items-center gap-2">
-            <button onclick="window.print()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg text-xs shadow-md">
-                Print / Save PDF
-            </button>
-            <button onclick="window.close()" class="px-3 py-2 bg-slate-800 text-slate-300 rounded-lg text-xs hover:text-white">
-                Close
-            </button>
-        </div>
+    <!-- Floating Print Action (Hidden during Print) -->
+    <div class="no-print fixed top-4 right-4 z-50 flex items-center gap-2">
+        <button onclick="window.print()" class="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg text-xs shadow-lg flex items-center gap-1.5 transition-all">
+            <svg class="w-3.5 h-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            Print / Save PDF
+        </button>
+        <button onclick="window.close()" class="px-2.5 py-1.5 bg-white/95 hover:bg-slate-100 text-slate-700 font-semibold rounded-lg text-xs border border-slate-300 shadow-md">
+            Close
+        </button>
     </div>
 
     <!-- Official Header -->

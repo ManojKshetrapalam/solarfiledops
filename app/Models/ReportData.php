@@ -18,9 +18,39 @@ class ReportData extends Model
         'data_json',
     ];
 
-    protected $casts = [
-        'data_json' => 'array',
-    ];
+    protected function dataJson(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: function ($value) {
+                if (is_array($value)) {
+                    return $value;
+                }
+                if (is_string($value)) {
+                    $decoded = json_decode($value, true);
+                    // Handle possible double-encoding
+                    if (is_string($decoded)) {
+                        $second = json_decode($decoded, true);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($second)) {
+                            return $second;
+                        }
+                    }
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        return $decoded;
+                    }
+                }
+                return [];
+            },
+            set: function ($value) {
+                if (is_string($value)) {
+                    $decoded = json_decode($value, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        return json_encode($decoded);
+                    }
+                }
+                return is_array($value) ? json_encode($value) : $value;
+            }
+        );
+    }
 
     public function report(): BelongsTo
     {

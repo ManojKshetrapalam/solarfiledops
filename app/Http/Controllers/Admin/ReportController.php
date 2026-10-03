@@ -63,7 +63,11 @@ class ReportController extends Controller
 
         $sections = [];
         foreach ($report->sections as $sec) {
-            $sections[$sec->section_key] = $sec->data_json;
+            $val = $sec->data_json;
+            if (is_string($val)) {
+                $val = json_decode($val, true) ?? [];
+            }
+            $sections[$sec->section_key] = is_array($val) ? $val : [];
         }
 
         $auditLogs = AuditLog::where('auditable_type', Report::class)
@@ -176,7 +180,11 @@ class ReportController extends Controller
 
         $sections = [];
         foreach ($report->sections as $sec) {
-            $sections[$sec->section_key] = $sec->data_json;
+            $val = $sec->data_json;
+            if (is_string($val)) {
+                $val = json_decode($val, true) ?? [];
+            }
+            $sections[$sec->section_key] = is_array($val) ? $val : [];
         }
 
         return view('admin.reports.print', compact('report', 'sections'));

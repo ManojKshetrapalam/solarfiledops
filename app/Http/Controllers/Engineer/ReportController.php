@@ -50,7 +50,11 @@ class ReportController extends Controller
         // Format sections into a convenient associative array
         $sections = [];
         foreach ($report->sections as $sec) {
-            $sections[$sec->section_key] = $sec->data_json;
+            $val = $sec->data_json;
+            if (is_string($val)) {
+                $val = json_decode($val, true) ?? [];
+            }
+            $sections[$sec->section_key] = is_array($val) ? $val : [];
         }
 
         return view('engineer.reports.edit', compact('report', 'sections'));
@@ -66,7 +70,11 @@ class ReportController extends Controller
 
         $sections = [];
         foreach ($report->sections as $sec) {
-            $sections[$sec->section_key] = $sec->data_json;
+            $val = $sec->data_json;
+            if (is_string($val)) {
+                $val = json_decode($val, true) ?? [];
+            }
+            $sections[$sec->section_key] = is_array($val) ? $val : [];
         }
 
         return view('engineer.reports.show', compact('report', 'sections'));
@@ -88,6 +96,13 @@ class ReportController extends Controller
         // Save each section sent in payload
         if ($request->has('sections') && is_array($request->sections)) {
             foreach ($request->sections as $sectionKey => $data) {
+                if (is_string($data)) {
+                    $decoded = json_decode($data, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        $data = $decoded;
+                    }
+                }
+
                 ReportData::updateOrCreate(
                     [
                         'report_id' => $report->id,
@@ -227,6 +242,13 @@ class ReportController extends Controller
         // Save any final changes from the form
         if ($request->has('sections') && is_array($request->sections)) {
             foreach ($request->sections as $sectionKey => $data) {
+                if (is_string($data)) {
+                    $decoded = json_decode($data, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        $data = $decoded;
+                    }
+                }
+
                 ReportData::updateOrCreate(
                     [
                         'report_id' => $report->id,

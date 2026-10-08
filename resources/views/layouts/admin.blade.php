@@ -123,6 +123,32 @@
                 </svg>
                 <span>Audit Trail</span>
             </a>
+
+            <div class="pt-3 pb-1 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">Data Management</div>
+
+            <a href="{{ route('admin.data-management.index') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors {{ (request()->routeIs('admin.data-management.index') || request()->routeIs('admin.data-management.preview') || request()->routeIs('admin.data-management.confirm')) ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 'hover:bg-slate-800 text-slate-300' }}">
+                <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <span>Import Data</span>
+            </a>
+
+            <a href="{{ route('admin.data-management.history') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors {{ request()->routeIs('admin.data-management.history*') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 'hover:bg-slate-800 text-slate-300' }}">
+                <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span>Import History</span>
+            </a>
+
+            <a href="{{ route('admin.data-management.templates') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors {{ request()->routeIs('admin.data-management.templates') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 'hover:bg-slate-800 text-slate-300' }}">
+                <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Download Templates</span>
+            </a>
         </nav>
 
         <!-- User profile in sidebar footer -->

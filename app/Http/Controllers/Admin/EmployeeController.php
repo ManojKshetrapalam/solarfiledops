@@ -34,12 +34,23 @@ class EmployeeController extends Controller
             $query->where('company_id', $request->company_id);
         }
 
+        if ($request->filled('login_status')) {
+            if ($request->login_status === 'pending_first_login') {
+                $query->where('password_change_required', true)->where('first_login_completed', false);
+            } elseif ($request->login_status === 'active') {
+                $query->where('password_change_required', false)->where('status', 'active');
+            } elseif ($request->login_status === 'inactive') {
+                $query->where('status', 'inactive');
+            }
+        }
+
         if ($request->filled('search')) {
             $s = $request->search;
             $query->where(function($q) use ($s) {
                 $q->where('name', 'like', "%{$s}%")
                   ->orWhere('email', 'like', "%{$s}%")
                   ->orWhere('employee_code', 'like', "%{$s}%")
+                  ->orWhere('username', 'like', "%{$s}%")
                   ->orWhere('phone', 'like', "%{$s}%");
             });
         }
@@ -61,6 +72,7 @@ class EmployeeController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'username' => ['nullable', 'string', 'max:50', 'unique:users,username'],
             'password' => ['required', 'string', 'min:6'],
             'employee_code' => ['required', 'string', 'max:50', 'unique:users,employee_code'],
             'phone' => ['required', 'string', 'max:50'],
@@ -76,14 +88,32 @@ class EmployeeController extends Controller
         }
         unset($validated['profile_photo']);
 
-        $validated['password'] = Hash::make($validated['password']);
+        $plainPassword = $validated['password'];
+        $validated['password'] = Hash::make($plainPassword);
         $validated['status'] = 'active';
 
-        $employee = User::create($validated);
+        if (empty($validated['username'])) {
+            $validated['username'] = User::generateUniqueUsername($validated['name']);
+        }
 
-        AuditLog::log($employee, 'created', "Employee '{$employee->name}' ({$employee->employee_code}) was created by Admin");
+        $employee = new User($validated);
+        if ($request->boolean('require_password_change', false)) {
+            $employee->setTemporaryPassword($plainPassword, 7);
+            $employee->password_change_required = true;
+            $employee->first_login_completed = false;
+        } else {
+            $employee->password_change_required = false;
+            $employee->first_login_completed = true;
+        }
+        $employee->save();
 
-        return redirect()->route('admin.employees.index')->with('success', "Employee '{$employee->name}' created successfully.");
+        AuditLog::log($employee, 'created', "Employee '{$employee->name}' ({$employee->employee_code}) was created by Admin with temporary credentials");
+
+        return redirect()->route('admin.employees.index')
+            ->with('success', "Employee '{$employee->name}' created successfully.")
+            ->with('revealed_temp_password', $plainPassword)
+            ->with('revealed_username', $employee->username)
+            ->with('revealed_employee_id', $employee->id);
     }
 
     public function show(User $employee): View
@@ -149,6 +179,28 @@ class EmployeeController extends Controller
         AuditLog::log($employee, 'password_reset', "Admin reset password for {$employee->name}");
 
         return back()->with('success', "Password for {$employee->name} has been reset successfully.");
+    }
+
+    public function regenerateTemporaryPassword(User $employee): RedirectResponse
+    {
+        $firstName = strtolower(explode(' ', trim($employee->name))[0] ?? 'solar');
+        $firstName = preg_replace('/[^a-z0-9]/', '', $firstName) ?: 'solar';
+        $tempPassword = $firstName . '123';
+
+        $employee->setTemporaryPassword($tempPassword, 7);
+        $employee->password = Hash::make($tempPassword);
+        $employee->password_change_required = true;
+        if (empty($employee->username)) {
+            $employee->username = User::generateUniqueUsername($employee->name);
+        }
+        $employee->save();
+
+        AuditLog::log($employee, 'EMPLOYEE_CREDENTIAL_REGENERATED', "Admin regenerated temporary onboarding password for {$employee->name} ({$employee->employee_code})");
+
+        return back()
+            ->with('success', "Temporary onboarding password regenerated for {$employee->name}: {$tempPassword}")
+            ->with('revealed_temp_password', $tempPassword)
+            ->with('revealed_employee_id', $employee->id);
     }
 
     public function toggleStatus(User $employee): RedirectResponse

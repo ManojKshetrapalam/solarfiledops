@@ -13,8 +13,10 @@ class Site extends Model
 
     protected $fillable = [
         'customer_id',
+        'site_code',
         'name',
         'address',
+        'system_capacity',
         'contact_person',
         'phone',
         'location_notes',

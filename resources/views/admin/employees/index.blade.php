@@ -21,10 +21,10 @@
 
     <!-- Filters & Search -->
     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-        <form method="GET" action="{{ route('admin.employees.index') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+        <form method="GET" action="{{ route('admin.employees.index') }}" class="grid grid-cols-1 sm:grid-cols-5 gap-3 text-xs">
             <div>
                 <label class="block font-bold text-slate-600 mb-1">Search Staff</label>
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Name, code, phone, email..."
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Name, code, phone, email, username..."
                        class="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
             </div>
 
@@ -46,6 +46,16 @@
                 </select>
             </div>
 
+            <div>
+                <label class="block font-bold text-slate-600 mb-1">Login Status</label>
+                <select name="login_status" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    <option value="">All Login Statuses</option>
+                    <option value="pending_first_login" {{ request('login_status') == 'pending_first_login' ? 'selected' : '' }}>Pending First Login</option>
+                    <option value="active" {{ request('login_status') == 'active' ? 'selected' : '' }}>Active — Password Changed</option>
+                    <option value="inactive" {{ request('login_status') == 'inactive' ? 'selected' : '' }}>Deactivated</option>
+                </select>
+            </div>
+
             <div class="flex items-end gap-2">
                 <button type="submit" class="px-4 py-2 bg-slate-900 text-white font-bold rounded-lg hover:bg-slate-800 transition-colors w-full">Filter</button>
                 <a href="{{ route('admin.employees.index') }}" class="px-3 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors text-center">Reset</a>
@@ -60,11 +70,11 @@
                 <thead>
                     <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
                         <th class="py-3.5 px-4">Engineer / Staff</th>
-                        <th class="py-3.5 px-4">Company Entity</th>
+                        <th class="py-3.5 px-4">Entity</th>
+                        <th class="py-3.5 px-4">User ID / Username</th>
                         <th class="py-3.5 px-4">Contact</th>
                         <th class="py-3.5 px-4">Active Jobs</th>
-                        <th class="py-3.5 px-4">Reports</th>
-                        <th class="py-3.5 px-4">Status</th>
+                        <th class="py-3.5 px-4">Login Status</th>
                         <th class="py-3.5 px-4 text-right">Actions</th>
                     </tr>
                 </thead>
@@ -94,6 +104,11 @@
                                 @endif
                             </td>
                             <td class="py-3 px-4">
+                                <span class="font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded text-xs">
+                                    {{ $emp->username ?? '—' }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4">
                                 <p class="font-medium text-slate-800">{{ $emp->phone ?? '—' }}</p>
                                 <p class="text-slate-400 text-[11px]">{{ $emp->email }}</p>
                             </td>
@@ -102,13 +117,12 @@
                                 <span class="text-[11px] text-slate-400 block">({{ $emp->completed_services_count }} completed)</span>
                             </td>
                             <td class="py-3 px-4">
-                                <span class="font-bold text-emerald-700 text-sm">{{ $emp->submitted_reports_count }}</span> submitted
-                            </td>
-                            <td class="py-3 px-4">
-                                @if($emp->status === 'active')
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">Active</span>
+                                @if($emp->status === 'inactive')
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">Deactivated</span>
+                                @elseif($emp->password_change_required)
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">Pending First Login</span>
                                 @else
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">Inactive</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">Active (Password Changed)</span>
                                 @endif
                             </td>
                             <td class="py-3 px-4 text-right">

@@ -25,9 +25,12 @@
                 @csrf
 
                 <div>
-                    <label for="email" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email Address</label>
-                    <input type="email" name="email" id="email" value="{{ old('email') }}" required autofocus
+                    <label for="login" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email Address or User ID</label>
+                    <input type="text" name="login" id="login" value="{{ old('login', old('email')) }}" required autofocus placeholder="e.g. admin, manoj, or user@solar.local"
                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all">
+                    @error('login')
+                        <p class="text-rose-600 text-xs mt-1.5 font-medium">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div>

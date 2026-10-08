@@ -103,7 +103,9 @@ e:\Projects\Solar/
 
 | Feature / Concern | Primary Location | Related Locations |
 |---|---|---|
-| **Authentication & Role Redirection** | `app/Http/Controllers/AuthController.php` | `app/Http/Middleware/`, `resources/views/auth/login.blade.php` |
+| **Authentication & First Login Flow** | `app/Http/Controllers/AuthController.php` | `app/Http/Middleware/EnsurePasswordChanged.php`, `resources/views/auth/login.blade.php`, `change-password.blade.php` |
+| **Data Migration & Excel Imports** | `app/Http/Controllers/Admin/DataManagementController.php` | `app/Services/DataMigrationService.php`, `app/Models/DataImport.php`, `resources/views/admin/data_management/` |
+| **Employee Credential Handover** | `app/Http/Controllers/Admin/EmployeeController.php`, `DataManagementController.php` | `resources/views/admin/employees/show.blade.php`, `data_management/completed.blade.php` |
 | **Companies / Entities** | `app/Http/Controllers/Admin/CompanyController.php` | `app/Models/Company.php`, `resources/views/admin/companies/` |
 | **Field Engineers / Employees** | `app/Http/Controllers/Admin/EmployeeController.php` | `app/Models/User.php`, `resources/views/admin/employees/` |
 | **Customers & Plant Sites** | `app/Http/Controllers/Admin/CustomerController.php`, `SiteController.php` | `app/Models/Customer.php`, `Site.php`, `resources/views/admin/customers/`, `sites/` |

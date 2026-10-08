@@ -7,9 +7,16 @@ The system digitizes paper-based solar maintenance and inspection forms into a s
 ---
 
 ## Current Status
-- **Core Operations**: Fully operational and verified with end-to-end automated feature tests.
-- **Workflow Phase**: First release covering Admin Panel, Company Entity Master, Employee Master, Customer & Site Masters, Service Dispatch, Mobile-First 10-Step Service Report, Draft Persistence, Photo Upload, Review & Approval/Correction cycles, and Company-wise Reporting.
-- **Form Extensibility**: Built with decoupled section payloads so additional report types (*Site Inspection*, *Installation Report*, *Complaint Attending*, *Daily Work Report*) can be plugged in without database schema changes.
+- **Core Operations**: Fully operational and verified with end-to-end automated feature tests (12 tests, 152 assertions, 100% passing).
+- **Form Digitization**: All paper forms from `Solar project/` digitized into mobile-first digital wizards:
+  - **3-Part Installation Bifurcation**: Partitioned into 3 domain-specialized forms dispatched to 3 independent technicians:
+    1. `installation_structure` (Part 1: Structure & Module Mounting)
+    2. `installation_electrical` (Part 2: Electrical & Cabling)
+    3. `installation_commissioning` (Part 3: Inverter / PCU & Commissioning)
+  - **Site Inspection Survey** (`site_inspection`): Contact directory, 3 EB sanction meters, day/night load, conduit sizing, rooftop & lifting logistics.
+  - **Complaint Attending Sheet** (`complaint_attending`): Intake, 5-point action record, spares replaced, 9-point post-attending health check, client handover.
+  - **Daily Work Report Timesheet** (`daily_work_report`): Shift timings, 13 hourly log slots (6:30 AM-9:30 PM), meal allowances, vehicle odometer calculation & conveyance claim.
+- **Workflow Phase**: Full lifecycle covering 1-Click Multi-Technician Bundled Dispatch, Single Service Dispatch, Touch Signature Capture (`touch-action: none` with canvas), Draft Persistence, Admin Review, Correction Cycles, Printable Audit Sheets, and Multi-Entity Isolation.
 
 ---
 
@@ -100,11 +107,17 @@ e:\Projects\Solar/
 | **Companies / Entities** | `app/Http/Controllers/Admin/CompanyController.php` | `app/Models/Company.php`, `resources/views/admin/companies/` |
 | **Field Engineers / Employees** | `app/Http/Controllers/Admin/EmployeeController.php` | `app/Models/User.php`, `resources/views/admin/employees/` |
 | **Customers & Plant Sites** | `app/Http/Controllers/Admin/CustomerController.php`, `SiteController.php` | `app/Models/Customer.php`, `Site.php`, `resources/views/admin/customers/`, `sites/` |
-| **Service Job Dispatch** | `app/Http/Controllers/Admin/ServiceController.php` | `app/Models/Service.php`, `ServiceAssignment.php`, `resources/views/admin/services/` |
-| **Mobile 10-Step Wizard** | `resources/views/engineer/reports/edit.blade.php` | `app/Http/Controllers/Engineer/ReportController.php`, `app/Models/ReportData.php` |
-| **Photo / Camera Uploads** | `app/Http/Controllers/Engineer/ReportController.php@uploadPhoto` | `app/Models/ReportPhoto.php`, `resources/views/engineer/reports/edit.blade.php` |
-| **Admin Report Review & Approval** | `app/Http/Controllers/Admin/ReportController.php` | `resources/views/admin/reports/show.blade.php`, `print.blade.php` |
-| **Correction Cycle** | `app/Http/Controllers/Admin/ReportController.php@requestCorrection` | `resources/views/admin/reports/show.blade.php`, `engineer/reports/edit.blade.php` |
+| **Service Job Dispatch (Single & 3-Part Bundle)** | `app/Http/Controllers/Admin/ServiceController.php` | `app/Models/Service.php`, `ServiceAssignment.php`, `resources/views/admin/services/create.blade.php` |
+| **Service Report Wizards (Mobile)** | `resources/views/engineer/reports/templates/` | `resources/views/engineer/reports/edit.blade.php`, `app/Http/Controllers/Engineer/ReportController.php` |
+| **Installation Structure (Part 1)** | `resources/views/engineer/reports/templates/installation_structure.blade.php` | `resources/views/admin/reports/templates/installation_structure.blade.php`, `..._print.blade.php` |
+| **Installation Electrical (Part 2)** | `resources/views/engineer/reports/templates/installation_electrical.blade.php` | `resources/views/admin/reports/templates/installation_electrical.blade.php`, `..._print.blade.php` |
+| **Installation Commissioning (Part 3)** | `resources/views/engineer/reports/templates/installation_commissioning.blade.php` | `resources/views/admin/reports/templates/installation_commissioning.blade.php`, `..._print.blade.php` |
+| **Site Inspection Feasibility** | `resources/views/engineer/reports/templates/site_inspection.blade.php` | `resources/views/admin/reports/templates/site_inspection.blade.php`, `..._print.blade.php` |
+| **Complaint Attending Sheet** | `resources/views/engineer/reports/templates/complaint_attending.blade.php` | `resources/views/admin/reports/templates/complaint_attending.blade.php`, `..._print.blade.php` |
+| **Daily Work Timesheet & Travel** | `resources/views/engineer/reports/templates/daily_work_report.blade.php` | `resources/views/engineer/daily_reports/`, `resources/views/admin/reports/templates/daily_work_report.blade.php` |
+| **Photo / Camera Uploads** | `app/Http/Controllers/Engineer/ReportController.php@uploadPhoto` | `app/Models/ReportPhoto.php`, `resources/views/engineer/reports/` |
+| **Admin Report Review & Approval** | `app/Http/Controllers/Admin/ReportController.php` | `resources/views/admin/reports/templates/`, `show.blade.php`, `print.blade.php` |
+| **Correction Cycle** | `app/Http/Controllers/Admin/ReportController.php@requestCorrection` | `resources/views/admin/reports/show.blade.php`, `engineer/reports/templates/` |
 | **Company-Wise Analytics** | `app/Http/Controllers/Admin/AnalyticsController.php` | `resources/views/admin/analytics/index.blade.php`, `admin/dashboard.blade.php` |
 | **Audit Logging** | `app/Models/AuditLog.php` | `app/Http/Controllers/Admin/AuditLogController.php`, `resources/views/admin/audit_logs/` |
 
@@ -180,8 +193,9 @@ php artisan serve
 
 ### Default Demo Credentials
 - **Admin Portal**: `admin@solar.local` / `password123`
-- **Field Engineer (Sun on Earth)**: `raj@solar.local` / `password123`
-- **Field Engineer (Sabha)**: `kiran@solar.local` / `password123`
+- **Field Engineer (Sun on Earth)**: `raj@solar.local` / `password123` (ENG-101)
+- **Field Engineer (Sabha)**: `kiran@solar.local` / `password123` (ENG-102)
+- **Field Engineer (Installation)**: `anand@solar.local` / `password123` (ENG-103)
 
 ---
 

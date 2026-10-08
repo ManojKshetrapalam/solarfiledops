@@ -60,7 +60,11 @@ class ServiceController extends Controller
         // Check if report already exists, or create new Draft report
         $report = $service->report;
         if (!$report) {
-            $template = ReportTemplate::where('slug', 'service_report')->first();
+            $templateSlug = $service->serviceType?->report_template_slug 
+                ?? $service->serviceType?->code 
+                ?? 'service_report';
+            $template = ReportTemplate::where('slug', $templateSlug)->first()
+                ?? ReportTemplate::where('slug', 'service_report')->first();
 
             // Generate report number e.g. SOE-REP-0001
             $count = Report::where('company_id', $service->company_id)->count() + 1;
@@ -82,11 +86,50 @@ class ServiceController extends Controller
                 'current_step' => 1,
             ]);
 
-            // Seed initial Step 1 data
-            ReportData::create([
-                'report_id' => $report->id,
-                'section_key' => 'customer_details',
-                'data_json' => [
+            // Seed initial Step 1 data based on template
+            $initialSectionKey = match ($templateSlug) {
+                'installation_structure', 'installation_electrical', 'installation_commissioning' => 'site_plant_info',
+                'site_inspection' => 'customer_site_details',
+                'complaint_attending' => 'plant_details',
+                'daily_work_report' => 'shift_details',
+                default => 'customer_details',
+            };
+
+            $initialData = match ($templateSlug) {
+                'installation_structure', 'installation_electrical', 'installation_commissioning' => [
+                    'customer_name' => $service->customer->name,
+                    'customer_address' => $service->site->address,
+                    'site_name' => $service->site->name,
+                    'plant_capacity' => '100 kW',
+                    'service_date' => now()->format('Y-m-d'),
+                    'technician_name' => auth()->user()->name,
+                    'technician_phone' => auth()->user()->phone ?? '',
+                ],
+                'site_inspection' => [
+                    'customer_name' => $service->customer->name,
+                    'customer_address' => $service->site->address,
+                    'phone_client' => $service->customer->phone,
+                    'client_name' => $service->customer->contact_person ?? '',
+                    'main_incharge' => $service->site->contact_person ?? '',
+                    'site_condition' => 'Existing',
+                    'building_type' => 'Commercial',
+                ],
+                'complaint_attending' => [
+                    'customer_name' => $service->customer->name,
+                    'customer_address' => $service->site->address,
+                    'plant_capacity' => '',
+                    'service_date' => now()->format('Y-m-d'),
+                    'technician_name' => auth()->user()->name,
+                ],
+                'daily_work_report' => [
+                    'employee_name' => auth()->user()->name,
+                    'designation' => auth()->user()->designation ?? 'Field Engineer',
+                    'report_date' => now()->format('Y-m-d'),
+                    'work_started_time' => '09:00',
+                    'work_stopped_time' => '18:00',
+                    'place_of_work' => $service->site->name ?? 'Office / Field',
+                ],
+                default => [
                     'customer_name' => $service->customer->name,
                     'customer_address' => $service->site->address,
                     'service_date' => now()->format('Y-m-d'),
@@ -96,6 +139,12 @@ class ServiceController extends Controller
                     'phone_maintenance' => '',
                     'phone_others' => '',
                 ],
+            };
+
+            ReportData::create([
+                'report_id' => $report->id,
+                'section_key' => $initialSectionKey,
+                'data_json' => $initialData,
             ]);
 
             AuditLog::log($report, 'draft_created', "Initial report draft created by {$service->assignedEngineer->name}");

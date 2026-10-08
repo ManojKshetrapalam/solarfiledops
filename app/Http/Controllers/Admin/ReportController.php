@@ -59,27 +59,28 @@ class ReportController extends Controller
             'sections',
             'photos',
             'documents',
+            'template',
         ]);
 
-        $sections = [];
-        foreach ($report->sections as $sec) {
-            $val = $sec->data_json;
-            if (is_string($val)) {
-                $val = json_decode($val, true) ?? [];
-            }
-            $sections[$sec->section_key] = is_array($val) ? $val : [];
-        }
+        $sections = $this->formatSections($report);
 
         $auditLogs = AuditLog::where('auditable_type', Report::class)
             ->where('auditable_id', $report->id)
             ->orWhere(function($q) use ($report) {
-                $q->where('auditable_type', \App\Models\Service::class)
-                  ->where('auditable_id', $report->service_id);
+                if ($report->service_id) {
+                    $q->where('auditable_type', \App\Models\Service::class)
+                      ->where('auditable_id', $report->service_id);
+                }
             })
             ->latest()
             ->get();
 
-        return view('admin.reports.show', compact('report', 'sections', 'auditLogs'));
+        $templateSlug = $report->template?->slug ?? 'service_report';
+        $viewName = view()->exists("admin.reports.templates.{$templateSlug}")
+            ? "admin.reports.templates.{$templateSlug}"
+            : "admin.reports.show";
+
+        return view($viewName, compact('report', 'sections', 'auditLogs'));
     }
 
     public function approve(Request $request, Report $report): RedirectResponse
@@ -91,14 +92,14 @@ class ReportController extends Controller
             'reviewed_by_id' => auth()->id(),
         ]);
 
-        $report->service->update([
+        $report->service?->update([
             'status' => 'completed',
         ]);
 
         Notification::create([
             'user_id' => $report->engineer_id,
             'title' => 'Report Approved!',
-            'message' => "Congratulations! Your service report #{$report->report_number} for {$report->customer->name} has been reviewed and APPROVED by Admin.",
+            'message' => "Congratulations! Your service report #{$report->report_number} has been reviewed and APPROVED by Admin.",
             'type' => 'report_approved',
             'action_url' => route('engineer.reports.show', $report->id),
         ]);
@@ -121,7 +122,7 @@ class ReportController extends Controller
             'reviewed_by_id' => auth()->id(),
         ]);
 
-        $report->service->update([
+        $report->service?->update([
             'status' => 'correction_required',
         ]);
 
@@ -176,8 +177,21 @@ class ReportController extends Controller
             'sections',
             'photos',
             'documents',
+            'template',
         ]);
 
+        $sections = $this->formatSections($report);
+
+        $templateSlug = $report->template?->slug ?? 'service_report';
+        $viewName = view()->exists("admin.reports.templates.{$templateSlug}_print")
+            ? "admin.reports.templates.{$templateSlug}_print"
+            : "admin.reports.print";
+
+        return view($viewName, compact('report', 'sections'));
+    }
+
+    protected function formatSections(Report $report): array
+    {
         $sections = [];
         foreach ($report->sections as $sec) {
             $val = $sec->data_json;
@@ -187,6 +201,23 @@ class ReportController extends Controller
             $sections[$sec->section_key] = is_array($val) ? $val : [];
         }
 
-        return view('admin.reports.print', compact('report', 'sections'));
+        $templateSlug = $report->template?->slug ?? 'service_report';
+        $knownSections = match ($templateSlug) {
+            'installation_structure' => ['site_plant_info', 'panels_delivery', 'structure_installation', 'module_mounting', 'safety_checklist'],
+            'installation_electrical' => ['site_plant_info', 'earthing_work', 'ajb_work', 'cabling_work', 'dcdb_acdb_work'],
+            'installation_commissioning' => ['site_plant_info', 'pcu_installation', 'battery_installation', 'commissioning_testing', 'handover_signoff'],
+            'site_inspection' => ['customer_site_details', 'power_req_meters', 'cabling_conduits', 'earthing_rooms_protection', 'rooftop_logistics'],
+            'complaint_attending' => ['plant_details', 'complaint_intake', 'attended_work', 'plant_checklist_9point', 'handover_signoff'],
+            'daily_work_report' => ['shift_details', 'hourly_activity_log', 'meals_allowance', 'travel_conveyance', 'work_summary_signoff'],
+            default => ['customer_details', 'system_details', 'module_inspection', 'structure_inspection', 'pcu_inspection', 'battery_inspection', 'complaint_details', 'remarks'],
+        };
+
+        foreach ($knownSections as $k) {
+            if (!isset($sections[$k])) {
+                $sections[$k] = [];
+            }
+        }
+
+        return $sections;
     }
 }

@@ -22,16 +22,82 @@ class ReportController extends Controller
     {
         $user = auth()->user();
 
-        $query = Report::with(['company', 'customer', 'site', 'service'])
+        $query = Report::with(['company', 'customer', 'site', 'service', 'template'])
             ->where('engineer_id', $user->id);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('template_slug')) {
+            $query->whereHas('template', fn($q) => $q->where('slug', $request->template_slug));
+        }
+
         $reports = $query->latest('updated_at')->paginate(10)->withQueryString();
 
         return view('engineer.reports.index', compact('reports'));
+    }
+
+    public function dailyReportsIndex(Request $request): View
+    {
+        $user = auth()->user();
+        $template = \App\Models\ReportTemplate::where('slug', 'daily_work_report')->first();
+
+        $query = Report::with(['company', 'customer', 'site', 'service', 'template'])
+            ->where('engineer_id', $user->id)
+            ->where('template_id', $template?->id);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $reports = $query->latest('created_at')->paginate(10)->withQueryString();
+
+        return view('engineer.daily_reports.index', compact('reports'));
+    }
+
+    public function createDailyReport(Request $request): RedirectResponse
+    {
+        $user = auth()->user();
+        $template = \App\Models\ReportTemplate::where('slug', 'daily_work_report')->first();
+        $companyId = $user->company_id ?? \App\Models\Company::first()?->id;
+
+        $count = Report::where('company_id', $companyId)->count() + 1;
+        $companyCode = $user->company?->code ?? 'SOL';
+        $reportNumber = sprintf('%s-DWR-%04d', strtoupper($companyCode), $count);
+        while (Report::where('report_number', $reportNumber)->exists()) {
+            $count++;
+            $reportNumber = sprintf('%s-DWR-%04d', strtoupper($companyCode), $count);
+        }
+
+        $report = Report::create([
+            'report_number' => $reportNumber,
+            'service_id' => null,
+            'template_id' => $template?->id,
+            'company_id' => $companyId,
+            'customer_id' => null,
+            'site_id' => null,
+            'engineer_id' => $user->id,
+            'status' => 'draft',
+            'current_step' => 1,
+        ]);
+
+        ReportData::create([
+            'report_id' => $report->id,
+            'section_key' => 'shift_details',
+            'data_json' => [
+                'employee_name' => $user->name,
+                'designation' => $user->designation ?? 'Solar Field Operations',
+                'report_date' => now()->format('Y-m-d'),
+                'work_started_time' => '09:00',
+                'work_stopped_time' => '18:00',
+                'place_of_work' => '',
+            ],
+        ]);
+
+        AuditLog::log($report, 'draft_created', "Daily work report draft started by {$user->name}");
+
+        return redirect()->route('engineer.reports.edit', $report->id);
     }
 
     public function edit(Report $report): View|RedirectResponse
@@ -45,19 +111,17 @@ class ReportController extends Controller
                 ->with('info', 'This report is submitted or approved and cannot be edited.');
         }
 
-        $report->load(['service.serviceType', 'company', 'customer', 'site', 'sections', 'photos', 'documents']);
+        $report->load(['service.serviceType', 'company', 'customer', 'site', 'sections', 'photos', 'documents', 'template']);
 
         // Format sections into a convenient associative array
-        $sections = [];
-        foreach ($report->sections as $sec) {
-            $val = $sec->data_json;
-            if (is_string($val)) {
-                $val = json_decode($val, true) ?? [];
-            }
-            $sections[$sec->section_key] = is_array($val) ? $val : [];
-        }
+        $sections = $this->formatSections($report);
 
-        return view('engineer.reports.edit', compact('report', 'sections'));
+        $templateSlug = $report->template?->slug ?? 'service_report';
+        $viewName = view()->exists("engineer.reports.templates.{$templateSlug}")
+            ? "engineer.reports.templates.{$templateSlug}"
+            : "engineer.reports.edit";
+
+        return view($viewName, compact('report', 'sections'));
     }
 
     public function show(Report $report): View
@@ -66,18 +130,16 @@ class ReportController extends Controller
             abort(403, 'Unauthorized.');
         }
 
-        $report->load(['service.serviceType', 'company', 'customer', 'site', 'sections', 'photos', 'documents', 'reviewer']);
+        $report->load(['service.serviceType', 'company', 'customer', 'site', 'sections', 'photos', 'documents', 'reviewer', 'template']);
 
-        $sections = [];
-        foreach ($report->sections as $sec) {
-            $val = $sec->data_json;
-            if (is_string($val)) {
-                $val = json_decode($val, true) ?? [];
-            }
-            $sections[$sec->section_key] = is_array($val) ? $val : [];
-        }
+        $sections = $this->formatSections($report);
 
-        return view('engineer.reports.show', compact('report', 'sections'));
+        $templateSlug = $report->template?->slug ?? 'service_report';
+        $viewName = view()->exists("engineer.reports.templates.{$templateSlug}_show")
+            ? "engineer.reports.templates.{$templateSlug}_show"
+            : "engineer.reports.show";
+
+        return view($viewName, compact('report', 'sections'));
     }
 
     public function saveDraft(Request $request, Report $report): JsonResponse|RedirectResponse
@@ -266,18 +328,20 @@ class ReportController extends Controller
 
         $report->update([
             'status' => $newStatus,
-            'current_step' => 10,
+            'current_step' => (int) ($request->current_step ?? $report->current_step ?? 6),
             'submitted_at' => now(),
         ]);
 
-        $report->service->update([
+        $report->service?->update([
             'status' => 'report_submitted',
         ]);
 
         // Notify Admins
         $admins = User::where('role', 'admin')->where('status', 'active')->get();
-        $title = $isResubmission ? 'Service Report Resubmitted' : 'New Service Report Submitted';
-        $message = "Engineer {$report->engineer->name} has " . ($isResubmission ? 'resubmitted corrected' : 'submitted') . " report #{$report->report_number} for {$report->company->name} / {$report->customer->name} ({$report->site->name}).";
+        $templateName = $report->template?->name ?? 'Service Report';
+        $title = $isResubmission ? "{$templateName} Resubmitted" : "New {$templateName} Submitted";
+        $customerInfo = $report->customer ? "for {$report->customer->name}" : '';
+        $message = "Engineer {$report->engineer->name} has " . ($isResubmission ? 'resubmitted corrected' : 'submitted') . " {$templateName} #{$report->report_number} ({$report->company->name}) {$customerInfo}.";
 
         foreach ($admins as $adm) {
             Notification::create([
@@ -289,9 +353,40 @@ class ReportController extends Controller
             ]);
         }
 
-        AuditLog::log($report, $newStatus, "Report #{$report->report_number} {$newStatus} by {$report->engineer->name}");
+        AuditLog::log($report, $newStatus, "Report #{$report->report_number} ({$templateName}) {$newStatus} by {$report->engineer->name}");
 
         return redirect()->route('engineer.reports.show', $report->id)
             ->with('success', 'Report submitted successfully! The admin operations team has been notified for verification.');
+    }
+
+    protected function formatSections(Report $report): array
+    {
+        $sections = [];
+        foreach ($report->sections as $sec) {
+            $val = $sec->data_json;
+            if (is_string($val)) {
+                $val = json_decode($val, true) ?? [];
+            }
+            $sections[$sec->section_key] = is_array($val) ? $val : [];
+        }
+
+        $templateSlug = $report->template?->slug ?? 'service_report';
+        $knownSections = match ($templateSlug) {
+            'installation_structure' => ['site_plant_info', 'panels_delivery', 'structure_installation', 'module_mounting', 'safety_checklist'],
+            'installation_electrical' => ['site_plant_info', 'earthing_work', 'ajb_work', 'cabling_work', 'dcdb_acdb_work'],
+            'installation_commissioning' => ['site_plant_info', 'pcu_installation', 'battery_installation', 'commissioning_testing', 'handover_signoff'],
+            'site_inspection' => ['customer_site_details', 'power_req_meters', 'cabling_conduits', 'earthing_rooms_protection', 'rooftop_logistics'],
+            'complaint_attending' => ['plant_details', 'complaint_intake', 'attended_work', 'plant_checklist_9point', 'handover_signoff'],
+            'daily_work_report' => ['shift_details', 'hourly_activity_log', 'meals_allowance', 'travel_conveyance', 'work_summary_signoff'],
+            default => ['customer_details', 'system_details', 'module_inspection', 'structure_inspection', 'pcu_inspection', 'battery_inspection', 'complaint_details', 'remarks'],
+        };
+
+        foreach ($knownSections as $k) {
+            if (!isset($sections[$k])) {
+                $sections[$k] = [];
+            }
+        }
+
+        return $sections;
     }
 }

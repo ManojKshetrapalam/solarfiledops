@@ -83,6 +83,96 @@ class ServiceController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        if ($request->input('dispatch_mode') === 'installation_bundle') {
+            $validated = $request->validate([
+                'company_id' => ['required', 'exists:companies,id'],
+                'customer_id' => ['required', 'exists:customers,id'],
+                'site_id' => ['required', 'exists:sites,id'],
+                'priority' => ['required', 'in:low,normal,high,urgent'],
+                'scheduled_date' => ['required', 'date'],
+                'description' => ['nullable', 'string'],
+                'structure_engineer_id' => ['required', 'exists:users,id'],
+                'electrical_engineer_id' => ['required', 'exists:users,id'],
+                'commissioning_engineer_id' => ['required', 'exists:users,id'],
+            ]);
+
+            $company = Company::findOrFail($validated['company_id']);
+            $customer = Customer::findOrFail($validated['customer_id']);
+            $site = Site::findOrFail($validated['site_id']);
+
+            $structType = ServiceType::where('code', 'installation_structure')->firstOrFail();
+            $elecType = ServiceType::where('code', 'installation_electrical')->firstOrFail();
+            $commType = ServiceType::where('code', 'installation_commissioning')->firstOrFail();
+
+            $parts = [
+                [
+                    'type' => $structType,
+                    'engineer_id' => $validated['structure_engineer_id'],
+                    'label' => 'Part 1: Structure & Module Mounting',
+                ],
+                [
+                    'type' => $elecType,
+                    'engineer_id' => $validated['electrical_engineer_id'],
+                    'label' => 'Part 2: Electrical & Cabling',
+                ],
+                [
+                    'type' => $commType,
+                    'engineer_id' => $validated['commissioning_engineer_id'],
+                    'label' => 'Part 3: Inverter (PCU) & Commissioning',
+                ],
+            ];
+
+            $createdServices = [];
+            \Illuminate\Support\Facades\DB::transaction(function () use ($company, $customer, $site, $validated, $parts, &$createdServices) {
+                foreach ($parts as $part) {
+                    $count = Service::where('company_id', $company->id)->count() + 1;
+                    $serviceNumber = sprintf('%s-SRV-%04d', strtoupper($company->code), $count);
+                    while (Service::where('service_number', $serviceNumber)->exists()) {
+                        $count++;
+                        $serviceNumber = sprintf('%s-SRV-%04d', strtoupper($company->code), $count);
+                    }
+
+                    $service = Service::create([
+                        'service_number' => $serviceNumber,
+                        'company_id' => $company->id,
+                        'customer_id' => $customer->id,
+                        'site_id' => $site->id,
+                        'service_type_id' => $part['type']->id,
+                        'assigned_user_id' => $part['engineer_id'],
+                        'priority' => $validated['priority'],
+                        'scheduled_date' => $validated['scheduled_date'],
+                        'description' => trim("Installation [{$part['label']}] " . ($validated['description'] ?? '')),
+                        'status' => 'assigned',
+                        'created_by_id' => auth()->id(),
+                    ]);
+
+                    ServiceAssignment::create([
+                        'service_id' => $service->id,
+                        'user_id' => $part['engineer_id'],
+                        'assigned_by_id' => auth()->id(),
+                        'assigned_at' => now(),
+                        'status' => 'assigned',
+                        'notes' => "Assigned for {$part['label']}.",
+                    ]);
+
+                    Notification::create([
+                        'user_id' => $part['engineer_id'],
+                        'title' => 'Installation Job Assigned (' . $part['label'] . ')',
+                        'message' => "Installation task #{$service->service_number} ({$part['label']}) at {$customer->name} ({$site->name}) has been assigned to you for {$service->scheduled_date->format('d M Y')}.",
+                        'type' => 'service_assigned',
+                        'action_url' => route('engineer.services.show', $service->id),
+                    ]);
+
+                    AuditLog::log($service, 'created', "Installation task {$service->service_number} ({$part['label']}) dispatched to engineer ID {$part['engineer_id']}");
+                    $createdServices[] = $service;
+                }
+            });
+
+            $serviceNumbers = collect($createdServices)->pluck('service_number')->join(', ');
+            return redirect()->route('admin.services.index')
+                ->with('success', "Dispatched 3-part installation project ({$serviceNumbers}) to 3 technicians successfully.");
+        }
+
         $validated = $request->validate([
             'company_id' => ['required', 'exists:companies,id'],
             'customer_id' => ['required', 'exists:customers,id'],

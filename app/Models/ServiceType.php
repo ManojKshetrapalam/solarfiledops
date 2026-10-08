@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ServiceType extends Model
@@ -13,6 +14,7 @@ class ServiceType extends Model
     protected $fillable = [
         'name',
         'code',
+        'report_template_slug',
         'description',
         'is_active',
     ];
@@ -24,5 +26,10 @@ class ServiceType extends Model
     public function services(): HasMany
     {
         return $this->hasMany(Service::class);
+    }
+
+    public function reportTemplate(): BelongsTo
+    {
+        return $this->belongsTo(ReportTemplate::class, 'report_template_slug', 'slug');
     }
 }

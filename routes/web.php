@@ -78,8 +78,10 @@ Route::prefix('engineer')->name('engineer.')->middleware(['auth', 'engineer'])->
     Route::get('/services/{service}', [EngineerServiceController::class, 'show'])->name('services.show');
     Route::post('/services/{service}/start', [EngineerServiceController::class, 'startService'])->name('services.start');
 
-    // 10-Step Service Report
+    // Reports & Work Logs
     Route::get('/reports', [EngineerReportController::class, 'index'])->name('reports.index');
+    Route::get('/daily-reports', [EngineerReportController::class, 'dailyReportsIndex'])->name('daily-reports.index');
+    Route::match(['get', 'post'], '/daily-reports/create', [EngineerReportController::class, 'createDailyReport'])->name('daily-reports.create');
     Route::get('/reports/{report}', [EngineerReportController::class, 'show'])->name('reports.show');
     Route::get('/reports/{report}/edit', [EngineerReportController::class, 'edit'])->name('reports.edit');
     Route::post('/reports/{report}/save-draft', [EngineerReportController::class, 'saveDraft'])->name('reports.save-draft');

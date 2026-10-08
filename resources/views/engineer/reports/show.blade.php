@@ -17,10 +17,10 @@
         </div>
 
         <h2 class="text-lg font-extrabold text-slate-900 leading-tight">
-            {{ $report->customer->name }}
+            {{ $report->customer?->name ?? ($report->template?->name ?? 'Field Report') }}
         </h2>
         <p class="text-xs text-slate-500 mt-0.5">
-            {{ $report->site->name }} &bull; {{ $report->company->name }}
+            {{ $report->site?->name ?? 'Field Timesheet' }} &bull; {{ $report->company->name }}
         </p>
 
         @if($report->status === 'approved')

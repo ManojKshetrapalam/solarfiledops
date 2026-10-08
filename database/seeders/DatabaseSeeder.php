@@ -41,7 +41,7 @@ class DatabaseSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // 2. Report Template
+        // 2. Report Templates
         $serviceReportTemplate = ReportTemplate::create([
             'name' => 'Standard Solar Service Report',
             'slug' => 'service_report',
@@ -62,10 +62,104 @@ class DatabaseSeeder extends Seeder
             'is_active' => true,
         ]);
 
+        $installStructureTemplate = ReportTemplate::create([
+            'name' => 'Installation: Structure & Module Mounting',
+            'slug' => 'installation_structure',
+            'schema_definition' => [
+                'steps' => [
+                    'site_plant_info',
+                    'panels_delivered',
+                    'mounting_work',
+                    'structure_work',
+                    'safety_checklist',
+                    'photos_signoff',
+                ],
+            ],
+            'is_active' => true,
+        ]);
+
+        $installElectricalTemplate = ReportTemplate::create([
+            'name' => 'Installation: Electrical & Cabling',
+            'slug' => 'installation_electrical',
+            'schema_definition' => [
+                'steps' => [
+                    'site_plant_info',
+                    'earthing_work',
+                    'ajb_work',
+                    'cabling_work',
+                    'dcdb_acdb_work',
+                    'photos_signoff',
+                ],
+            ],
+            'is_active' => true,
+        ]);
+
+        $installCommissioningTemplate = ReportTemplate::create([
+            'name' => 'Installation: Inverter (PCU) & Commissioning',
+            'slug' => 'installation_commissioning',
+            'schema_definition' => [
+                'steps' => [
+                    'site_plant_info',
+                    'pcu_installation',
+                    'battery_installation',
+                    'commissioning_testing',
+                    'handover_signoff',
+                ],
+            ],
+            'is_active' => true,
+        ]);
+
+        $siteInspectionTemplate = ReportTemplate::create([
+            'name' => 'Site Inspection Report',
+            'slug' => 'site_inspection',
+            'schema_definition' => [
+                'steps' => [
+                    'customer_site_details',
+                    'power_req_meters',
+                    'cabling_conduits',
+                    'earthing_rooms_protection',
+                    'rooftop_logistics',
+                    'photos_signoff',
+                ],
+            ],
+            'is_active' => true,
+        ]);
+
+        $complaintAttendingTemplate = ReportTemplate::create([
+            'name' => 'Complaint Attending Report',
+            'slug' => 'complaint_attending',
+            'schema_definition' => [
+                'steps' => [
+                    'plant_details',
+                    'complaint_intake',
+                    'attended_work',
+                    'plant_checklist_9point',
+                    'handover_signoff',
+                ],
+            ],
+            'is_active' => true,
+        ]);
+
+        $dailyWorkReportTemplate = ReportTemplate::create([
+            'name' => 'Daily Work Report',
+            'slug' => 'daily_work_report',
+            'schema_definition' => [
+                'steps' => [
+                    'shift_details',
+                    'hourly_activity_log',
+                    'meals_allowance',
+                    'travel_conveyance',
+                    'work_summary_signoff',
+                ],
+            ],
+            'is_active' => true,
+        ]);
+
         // 3. Service Types
         $routine = ServiceType::create([
             'name' => 'Routine Service',
             'code' => 'routine_service',
+            'report_template_slug' => 'service_report',
             'description' => 'Periodic quarterly preventive maintenance and plant health checkup',
             'is_active' => true,
         ]);
@@ -73,6 +167,7 @@ class DatabaseSeeder extends Seeder
         $breakdown = ServiceType::create([
             'name' => 'Breakdown Maintenance',
             'code' => 'breakdown_maintenance',
+            'report_template_slug' => 'service_report',
             'description' => 'Urgent corrective repairs, inverter faults, or electrical trip resolution',
             'is_active' => true,
         ]);
@@ -80,7 +175,56 @@ class DatabaseSeeder extends Seeder
         $inspection = ServiceType::create([
             'name' => 'Solar Module Inspection',
             'code' => 'module_inspection',
+            'report_template_slug' => 'service_report',
             'description' => 'Comprehensive thermographic and electrical analysis of PV modules',
+            'is_active' => true,
+        ]);
+
+        $installStructType = ServiceType::create([
+            'name' => 'Installation: Structure & Module Mounting',
+            'code' => 'installation_structure',
+            'report_template_slug' => 'installation_structure',
+            'description' => 'Civil, mechanical mounting, panel placement, and wind safety structure work',
+            'is_active' => true,
+        ]);
+
+        $installElecType = ServiceType::create([
+            'name' => 'Installation: Electrical & Cabling',
+            'code' => 'installation_electrical',
+            'report_template_slug' => 'installation_electrical',
+            'description' => 'Earthing pits, string wiring, AJB, DCDB, ACDB, conduit, and cable trays',
+            'is_active' => true,
+        ]);
+
+        $installCommType = ServiceType::create([
+            'name' => 'Installation: Inverter (PCU) & Commissioning',
+            'code' => 'installation_commissioning',
+            'report_template_slug' => 'installation_commissioning',
+            'description' => 'Inverter/PCU setup, battery bank connection, testing, and plant commissioning',
+            'is_active' => true,
+        ]);
+
+        $siteInspectType = ServiceType::create([
+            'name' => 'Site Inspection',
+            'code' => 'site_inspection',
+            'report_template_slug' => 'site_inspection',
+            'description' => 'Pre-installation site feasibility, EB bills, load calculations, and rooftop assessment',
+            'is_active' => true,
+        ]);
+
+        $complaintType = ServiceType::create([
+            'name' => 'Complaint Attending',
+            'code' => 'complaint_attending',
+            'report_template_slug' => 'complaint_attending',
+            'description' => 'Attending customer complaints, troubleshooting faults, and 9-point health verification',
+            'is_active' => true,
+        ]);
+
+        $dailyWorkType = ServiceType::create([
+            'name' => 'Daily Work Report',
+            'code' => 'daily_work_report',
+            'report_template_slug' => 'daily_work_report',
+            'description' => 'Daily personnel timesheet, hourly activity log, meals, and conveyance tracking',
             'is_active' => true,
         ]);
 
@@ -121,6 +265,19 @@ class DatabaseSeeder extends Seeder
             'company_id' => $sabha->id,
             'status' => 'active',
             'joining_date' => '2024-06-01',
+        ]);
+
+        $anand = User::create([
+            'name' => 'Anand Verma',
+            'email' => 'anand@solar.local',
+            'password' => Hash::make('password123'),
+            'role' => 'engineer',
+            'employee_code' => 'ENG-103',
+            'phone' => '+91 98000 00004',
+            'designation' => 'Commissioning Specialist',
+            'company_id' => $soe->id,
+            'status' => 'active',
+            'joining_date' => '2024-07-01',
         ]);
 
         // 5. Customers & Sites

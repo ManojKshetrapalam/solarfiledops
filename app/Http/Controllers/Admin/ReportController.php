@@ -209,6 +209,7 @@ class ReportController extends Controller
             'site_inspection' => ['customer_site_details', 'power_req_meters', 'cabling_conduits', 'earthing_rooms_protection', 'rooftop_logistics'],
             'complaint_attending' => ['plant_details', 'complaint_intake', 'attended_work', 'plant_checklist_9point', 'handover_signoff'],
             'daily_work_report' => ['shift_details', 'hourly_activity_log', 'meals_allowance', 'travel_conveyance', 'work_summary_signoff'],
+            'customer_feedback' => ['customer_project_details', 'ratings_experience', 'solar_system_feedback', 'service_complaint_feedback', 'comments_suggestions', 'overall_recommendation', 'customer_confirmation'],
             default => ['customer_details', 'system_details', 'module_inspection', 'structure_inspection', 'pcu_inspection', 'battery_inspection', 'complaint_details', 'remarks'],
         };
 

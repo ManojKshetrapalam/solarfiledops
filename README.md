@@ -115,6 +115,7 @@ e:\Projects\Solar/
 | **Site Inspection Feasibility** | `resources/views/engineer/reports/templates/site_inspection.blade.php` | `resources/views/admin/reports/templates/site_inspection.blade.php`, `..._print.blade.php` |
 | **Complaint Attending Sheet** | `resources/views/engineer/reports/templates/complaint_attending.blade.php` | `resources/views/admin/reports/templates/complaint_attending.blade.php`, `..._print.blade.php` |
 | **Daily Work Timesheet & Travel** | `resources/views/engineer/reports/templates/daily_work_report.blade.php` | `resources/views/engineer/daily_reports/`, `resources/views/admin/reports/templates/daily_work_report.blade.php` |
+| **Customer Feedback & Satisfaction** | `resources/views/engineer/reports/templates/customer_feedback.blade.php` | `resources/views/admin/reports/templates/customer_feedback.blade.php`, `..._print.blade.php` |
 | **Photo / Camera Uploads** | `app/Http/Controllers/Engineer/ReportController.php@uploadPhoto` | `app/Models/ReportPhoto.php`, `resources/views/engineer/reports/` |
 | **Admin Report Review & Approval** | `app/Http/Controllers/Admin/ReportController.php` | `resources/views/admin/reports/templates/`, `show.blade.php`, `print.blade.php` |
 | **Correction Cycle** | `app/Http/Controllers/Admin/ReportController.php@requestCorrection` | `resources/views/admin/reports/show.blade.php`, `engineer/reports/templates/` |

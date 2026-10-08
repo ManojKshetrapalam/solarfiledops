@@ -116,6 +116,19 @@ class ExpandTemplatesSeeder extends Seeder
                     ],
                 ],
             ],
+            [
+                'name' => 'Customer Feedback & Satisfaction Form',
+                'slug' => 'customer_feedback',
+                'schema_definition' => [
+                    'steps' => [
+                        'customer_project_details',
+                        'ratings_experience',
+                        'system_service_feedback',
+                        'comments_recommendation',
+                        'customer_confirmation',
+                    ],
+                ],
+            ],
         ];
 
         foreach ($templates as $t) {
@@ -183,6 +196,12 @@ class ExpandTemplatesSeeder extends Seeder
                 'code' => 'daily_work_report',
                 'report_template_slug' => 'daily_work_report',
                 'description' => 'Field engineer daily activity timesheet, vehicle KM conveyance claim, meal allowances',
+            ],
+            [
+                'name' => 'Customer Feedback & Satisfaction Survey',
+                'code' => 'customer_feedback',
+                'report_template_slug' => 'customer_feedback',
+                'description' => 'Post-installation, service, maintenance or inspection customer satisfaction audit',
             ],
         ];
 

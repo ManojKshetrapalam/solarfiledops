@@ -388,4 +388,135 @@ class MultiTemplateFormsTest extends TestCase
         $complaintPrint->assertOk();
         $complaintPrint->assertSee('COMPLAINT ATTENDING SHEET');
     }
+
+    public function test_engineer_can_complete_and_submit_customer_feedback_form_and_admin_approve(): void
+    {
+        $engineer = User::where('role', 'engineer')->first();
+        $this->actingAs($engineer);
+
+        $company = Company::first();
+        $customer = Customer::first();
+        $site = Site::first();
+
+        $feedbackType = ServiceType::where('report_template_slug', 'customer_feedback')->firstOrFail();
+        $feedbackService = Service::create([
+            'service_number' => 'SRV-FEEDBACK-01',
+            'company_id' => $company->id,
+            'customer_id' => $customer->id,
+            'site_id' => $site->id,
+            'service_type_id' => $feedbackType->id,
+            'assigned_user_id' => $engineer->id,
+            'scheduled_date' => now()->toDateString(),
+            'scheduled_time' => '11:00',
+            'status' => 'assigned',
+            'priority' => 'medium',
+        ]);
+
+        // 1. Start Service & Create Report
+        $this->post(route('engineer.services.start', $feedbackService->id));
+        $report = Report::where('service_id', $feedbackService->id)->firstOrFail();
+        $this->assertEquals('customer_feedback', $report->template->slug);
+        $this->assertEquals('draft', $report->status);
+
+        // 2. Engineer Saves Draft with 10-Point Ratings and Signature
+        $draftData = [
+            'current_step' => 5,
+            'sections' => [
+                'customer_project_details' => [
+                    'customer_name' => $customer->name,
+                    'site_address' => $site->address,
+                    'contact_person' => $customer->contact_person,
+                    'mobile_no' => $customer->phone,
+                    'system_capacity' => '10 kW Solar Rooftop',
+                    'feedback_date' => now()->toDateString(),
+                    'installation_date' => now()->subMonths(1)->toDateString(),
+                    'type_of_visit' => 'service',
+                ],
+                'ratings_experience' => [
+                    'rate_quality_work' => 5,
+                    'rate_quality_materials' => 5,
+                    'rate_professionalism' => 5,
+                    'rate_behaviour_communication' => 5,
+                    'rate_punctuality' => 4,
+                    'rate_cleanliness' => 5,
+                    'rate_explanation_operation' => 5,
+                    'rate_explanation_safety' => 4,
+                    'rate_response_questions' => 5,
+                    'rate_overall_satisfaction' => 5,
+                ],
+                'solar_system_feedback' => [
+                    'work_satisfactory' => 'YES',
+                    'performing_as_explained' => 'YES',
+                    'components_explained' => 'YES',
+                    'safety_explained' => 'YES',
+                    'maintenance_explained' => 'YES',
+                ],
+                'service_complaint_feedback' => [
+                    'concern_understood' => 'YES',
+                    'response_time_satisfactory' => 'YES',
+                    'issue_rectified' => 'YES',
+                    'solution_explained' => 'YES',
+                    'system_functioning' => 'YES',
+                    'work_pending' => 'NO',
+                ],
+                'comments_suggestions' => [
+                    'what_done_well' => 'Very polite team, neat conduit installation',
+                    'what_to_improve' => 'Faster inverter WiFi pairing',
+                    'other_feedback' => 'Keep up the great work',
+                    'pending_issue_details' => 'None',
+                ],
+                'overall_recommendation' => [
+                    'overall_experience' => 5,
+                    'recommend_services' => 'YES',
+                    'contact_for_testimonial' => 'YES',
+                ],
+                'customer_confirmation' => [
+                    'client_confirmed' => true,
+                    'customer_name' => $customer->name,
+                    'contact_no' => $customer->phone,
+                    'feedback_date' => now()->toDateString(),
+                    'client_signature' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+                ],
+            ],
+        ];
+
+        $draftResponse = $this->postJson(route('engineer.reports.save-draft', $report->id), $draftData);
+        $draftResponse->assertOk();
+        $draftResponse->assertJson(['success' => true]);
+
+        // 3. Engineer Submits Report
+        $submitResponse = $this->post(route('engineer.reports.submit', $report->id), ['current_step' => 5]);
+        $submitResponse->assertRedirect(route('engineer.reports.show', $report->id));
+
+        $report->refresh();
+        $this->assertEquals('submitted', $report->status);
+
+        // Engineer Show View
+        $engShow = $this->get(route('engineer.reports.show', $report->id));
+        $engShow->assertOk();
+        $engShow->assertSee('Customer Feedback', false);
+        $engShow->assertSee('Quality of installation / work');
+
+        // 4. Admin Verification & Approval
+        $admin = User::where('role', 'admin')->first();
+        $this->actingAs($admin);
+
+        $adminShow = $this->get(route('admin.reports.show', $report->id));
+        $adminShow->assertOk();
+        $adminShow->assertSee('Customer Feedback', false);
+        $adminShow->assertSee('Very polite team, neat conduit installation');
+
+        $adminPrint = $this->get(route('admin.reports.print', $report->id));
+        $adminPrint->assertOk();
+        $adminPrint->assertSee('CUSTOMER FEEDBACK', false);
+        $adminPrint->assertSee('SUN ON EARTH SOLAR TECHNOLOGIES', false);
+
+        // Approve
+        $approveResponse = $this->post(route('admin.reports.approve', $report->id));
+        $approveResponse->assertSessionHas('success');
+
+        $report->refresh();
+        $this->assertEquals('approved', $report->status);
+        $this->assertEquals('completed', $report->service->status);
+    }
 }

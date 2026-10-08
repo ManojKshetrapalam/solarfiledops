@@ -92,6 +92,7 @@ class ServiceController extends Controller
                 'site_inspection' => 'customer_site_details',
                 'complaint_attending' => 'plant_details',
                 'daily_work_report' => 'shift_details',
+                'customer_feedback' => 'customer_project_details',
                 default => 'customer_details',
             };
 
@@ -128,6 +129,21 @@ class ServiceController extends Controller
                     'work_started_time' => '09:00',
                     'work_stopped_time' => '18:00',
                     'place_of_work' => $service->site->name ?? 'Office / Field',
+                ],
+                'customer_feedback' => [
+                    'customer_name' => $service->customer->name,
+                    'feedback_date' => now()->format('Y-m-d'),
+                    'site_address' => $service->site->address,
+                    'mobile_no' => $service->customer->phone,
+                    'contact_person' => $service->customer->contact_person ?? '',
+                    'system_capacity' => '5 kW Rooftop Solar',
+                    'installation_date' => '',
+                    'type_of_visit' => match ($service->serviceType?->code) {
+                        'installation_structure', 'installation_electrical', 'installation_commissioning' => 'installation',
+                        'complaint_attending', 'breakdown_maintenance' => 'complaint',
+                        'site_inspection' => 'inspection',
+                        default => 'service',
+                    },
                 ],
                 default => [
                     'customer_name' => $service->customer->name,

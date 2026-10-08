@@ -155,6 +155,21 @@ class DatabaseSeeder extends Seeder
             'is_active' => true,
         ]);
 
+        $customerFeedbackTemplate = ReportTemplate::create([
+            'name' => 'Customer Feedback & Satisfaction Form',
+            'slug' => 'customer_feedback',
+            'schema_definition' => [
+                'steps' => [
+                    'customer_project_details',
+                    'ratings_experience',
+                    'system_service_feedback',
+                    'comments_recommendation',
+                    'customer_confirmation',
+                ],
+            ],
+            'is_active' => true,
+        ]);
+
         // 3. Service Types
         $routine = ServiceType::create([
             'name' => 'Routine Service',
@@ -225,6 +240,14 @@ class DatabaseSeeder extends Seeder
             'code' => 'daily_work_report',
             'report_template_slug' => 'daily_work_report',
             'description' => 'Daily personnel timesheet, hourly activity log, meals, and conveyance tracking',
+            'is_active' => true,
+        ]);
+
+        $feedbackType = ServiceType::create([
+            'name' => 'Customer Feedback & Satisfaction Survey',
+            'code' => 'customer_feedback',
+            'report_template_slug' => 'customer_feedback',
+            'description' => 'Post-installation, service, maintenance or inspection customer satisfaction audit',
             'is_active' => true,
         ]);
 

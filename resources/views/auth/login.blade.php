@@ -91,9 +91,16 @@
 </div>
 
 <script>
-    function fillCredentials(email, password) {
-        document.getElementById('email').value = email;
-        document.getElementById('password').value = password;
+    function fillCredentials(identifier, password) {
+        var loginEl = document.getElementById('login') || document.getElementById('email');
+        var passEl = document.getElementById('password');
+        if (loginEl) {
+            loginEl.value = identifier;
+            loginEl.focus();
+        }
+        if (passEl) {
+            passEl.value = password;
+        }
     }
 </script>
 @endsection

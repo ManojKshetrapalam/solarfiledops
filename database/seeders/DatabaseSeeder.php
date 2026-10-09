@@ -254,6 +254,7 @@ class DatabaseSeeder extends Seeder
         // 4. Users (Admin + Engineers)
         $admin = User::create([
             'name' => 'Operations Admin',
+            'username' => 'admin',
             'email' => 'admin@solar.local',
             'password' => Hash::make('password123'),
             'role' => 'admin',
@@ -266,6 +267,7 @@ class DatabaseSeeder extends Seeder
 
         $raj = User::create([
             'name' => 'Raj Kumar',
+            'username' => 'raj',
             'email' => 'raj@solar.local',
             'password' => Hash::make('password123'),
             'role' => 'engineer',
@@ -279,6 +281,7 @@ class DatabaseSeeder extends Seeder
 
         $kiran = User::create([
             'name' => 'Kiran Sharma',
+            'username' => 'kiran',
             'email' => 'kiran@solar.local',
             'password' => Hash::make('password123'),
             'role' => 'engineer',
@@ -292,6 +295,7 @@ class DatabaseSeeder extends Seeder
 
         $anand = User::create([
             'name' => 'Anand Verma',
+            'username' => 'anand',
             'email' => 'anand@solar.local',
             'password' => Hash::make('password123'),
             'role' => 'engineer',

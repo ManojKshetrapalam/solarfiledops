@@ -53,6 +53,40 @@ class AuthAndAccessTest extends TestCase
         $response->assertStatus(403);
     }
 
+    public function test_admin_can_login_with_username(): void
+    {
+        $response = $this->post('/login', [
+            'login' => 'admin',
+            'password' => 'password123',
+        ]);
+
+        $response->assertRedirect(route('admin.dashboard'));
+        $this->assertAuthenticated();
+    }
+
+    public function test_engineer_can_login_with_username_and_employee_code(): void
+    {
+        // Login with username
+        $response = $this->post('/login', [
+            'login' => 'raj',
+            'password' => 'password123',
+        ]);
+        $response->assertRedirect(route('engineer.dashboard'));
+        $this->assertAuthenticated();
+
+        // Logout
+        $this->post('/logout');
+        $this->assertGuest();
+
+        // Login with employee code
+        $response2 = $this->post('/login', [
+            'login' => 'ENG-101',
+            'password' => 'password123',
+        ]);
+        $response2->assertRedirect(route('engineer.dashboard'));
+        $this->assertAuthenticated();
+    }
+
     public function test_unauthenticated_user_is_redirected_to_login(): void
     {
         $response = $this->get(route('admin.dashboard'));
@@ -62,3 +96,4 @@ class AuthAndAccessTest extends TestCase
         $response2->assertRedirect(route('login'));
     }
 }
+

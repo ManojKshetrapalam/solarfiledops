@@ -76,7 +76,7 @@
                 <div class="flex-1 min-w-0">
                     <span class="text-[10px] font-black uppercase tracking-wider text-slate-900 block">Correction Requested by Admin</span>
                     <p class="text-xs font-bold text-slate-950 mt-0.5">
-                        Report #{{ $cr->report_number }} &bull; {{ $cr->customer->name }}
+                        Report #{{ $cr->report_number }} &bull; {{ $cr->customer?->name ?? 'General' }}
                     </p>
                     <p class="text-[11px] text-slate-900 mt-1 bg-amber-400/80 p-2 rounded-lg font-medium">
                         "{{ $cr->correction_notes }}"

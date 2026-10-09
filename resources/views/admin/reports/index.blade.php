@@ -72,20 +72,20 @@
                                 <a href="{{ route('admin.reports.show', $rep->id) }}" class="font-bold text-slate-900 hover:text-amber-600 text-sm block">
                                     {{ $rep->report_number }}
                                 </a>
-                                <span class="text-slate-400 text-[11px]">Job: {{ $rep->service->service_number }}</span>
+                                <span class="text-slate-400 text-[11px]">{{ $rep->service ? 'Job: ' . $rep->service->service_number : ($rep->template?->name ?? 'Standalone Report') }}</span>
                             </td>
                             <td class="py-3 px-4">
-                                <p class="font-bold text-slate-800">{{ $rep->customer->name }}</p>
-                                <p class="text-slate-500 text-[11px]">{{ $rep->site->name }}</p>
+                                <p class="font-bold text-slate-800">{{ $rep->customer?->name ?? 'Internal / Operations' }}</p>
+                                <p class="text-slate-500 text-[11px]">{{ $rep->site?->name ?? 'General Site' }}</p>
                             </td>
                             <td class="py-3 px-4">
                                 <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800 border border-slate-200">
-                                    {{ $rep->company->name }}
+                                    {{ $rep->company?->name ?? 'System' }}
                                 </span>
                             </td>
                             <td class="py-3 px-4">
-                                <span class="font-semibold text-slate-800">{{ $rep->engineer->name }}</span>
-                                <span class="text-[11px] text-slate-400 block">{{ $rep->engineer->employee_code }}</span>
+                                <span class="font-semibold text-slate-800">{{ $rep->engineer?->name ?? 'Unassigned' }}</span>
+                                <span class="text-[11px] text-slate-400 block">{{ $rep->engineer?->employee_code ?? '' }}</span>
                             </td>
                             <td class="py-3 px-4">
                                 {{ $rep->submitted_at ? $rep->submitted_at->format('d M Y, h:i A') : 'Not submitted' }}

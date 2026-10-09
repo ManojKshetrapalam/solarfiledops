@@ -6,6 +6,8 @@ use App\Models\AuditLog;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\DataImport;
+use App\Models\Report;
+use App\Models\ReportTemplate;
 use App\Models\Site;
 use App\Models\User;
 use App\Services\DataMigrationService;
@@ -382,4 +384,45 @@ class DataMigrationAndOnboardingTest extends TestCase
             'auditable_id' => $employee->id,
         ]);
     }
+
+    public function test_admin_reports_screens_render_successfully_with_standalone_reports(): void
+    {
+        $admin = User::where('role', 'admin')->first();
+        $this->actingAs($admin);
+
+        $template = \App\Models\ReportTemplate::first();
+        $company = Company::first();
+        $engineer = User::where('role', 'engineer')->first();
+
+        // Create standalone report with null service, null customer, null site (like migrated Daily Work Reports)
+        $standaloneReport = Report::create([
+            'report_number' => 'REP-STANDALONE-001',
+            'service_id' => null,
+            'template_id' => $template->id,
+            'company_id' => $company->id,
+            'customer_id' => null,
+            'site_id' => null,
+            'engineer_id' => $engineer->id,
+            'status' => 'approved',
+            'current_step' => 5,
+            'submitted_at' => now(),
+            'approved_at' => now(),
+        ]);
+
+        // 1. Visit admin reports index
+        $indexResponse = $this->get(route('admin.reports.index'));
+        $indexResponse->assertStatus(200);
+        $indexResponse->assertSee('REP-STANDALONE-001');
+
+        // 2. Visit admin report show
+        $showResponse = $this->get(route('admin.reports.show', $standaloneReport->id));
+        $showResponse->assertStatus(200);
+        $showResponse->assertSee('REP-STANDALONE-001');
+
+        // 3. Visit admin report print
+        $printResponse = $this->get(route('admin.reports.print', $standaloneReport->id));
+        $printResponse->assertStatus(200);
+        $printResponse->assertSee('REP-STANDALONE-001');
+    }
 }
+

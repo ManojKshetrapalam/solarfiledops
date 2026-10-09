@@ -39,7 +39,7 @@
                     SERVICE REPORT
                 </span>
                 <p class="font-mono font-bold text-xs mt-1">NO: {{ $report->report_number }}</p>
-                <p class="text-[10px] text-slate-500">Job: #{{ $report->service->service_number }}</p>
+                <p class="text-[10px] text-slate-500">Job: #{{ $report->service?->service_number ?? 'N/A' }}</p>
             </div>
         </div>
 
@@ -47,9 +47,9 @@
         <div class="grid grid-cols-2 gap-4 text-xs">
             <div class="border border-slate-300 p-2.5 rounded bg-slate-50/50">
                 <strong class="block uppercase font-bold text-[10px] text-slate-500 mb-1">Customer Name & Address</strong>
-                <p class="font-bold text-sm text-slate-900">{{ $report->customer->name }}</p>
-                <p class="text-slate-700 mt-0.5">{{ $report->site->name }}</p>
-                <p class="text-slate-600 text-[11px]">{{ $report->site->address }}</p>
+                <p class="font-bold text-sm text-slate-900">{{ $report->customer?->name ?? 'Internal / General Operations' }}</p>
+                <p class="text-slate-700 mt-0.5">{{ $report->site?->name ?? 'General Site' }}</p>
+                <p class="text-slate-600 text-[11px]">{{ $report->site?->address ?? '' }}</p>
             </div>
 
             <div class="border border-slate-300 p-2.5 rounded bg-slate-50/50 space-y-1">

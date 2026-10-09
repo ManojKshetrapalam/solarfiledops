@@ -16,7 +16,7 @@ class ReportController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Report::with(['company', 'customer', 'site', 'engineer', 'service.serviceType']);
+        $query = Report::with(['company', 'customer', 'site', 'engineer', 'service.serviceType', 'template']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);

@@ -138,13 +138,13 @@
                                 <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $rep->status_badge_class }}">
                                     {{ strtoupper(str_replace('_', ' ', $rep->status)) }}
                                 </span>
-                                <span class="text-[11px] text-slate-400 font-medium">({{ $rep->company->name }})</span>
+                                <span class="text-[11px] text-slate-400 font-medium">({{ $rep->company?->name ?? 'System' }})</span>
                             </div>
                             <p class="text-xs text-slate-600 truncate font-medium">
-                                {{ $rep->customer->name }} &bull; {{ $rep->site->name }}
+                                {{ $rep->customer?->name ?? 'Internal / Operations' }} &bull; {{ $rep->site?->name ?? 'General Site' }}
                             </p>
                             <p class="text-[11px] text-slate-400 mt-0.5">
-                                Engineer: <strong class="text-slate-700">{{ $rep->engineer->name }}</strong> &bull; 
+                                Engineer: <strong class="text-slate-700">{{ $rep->engineer?->name ?? 'Unassigned' }}</strong> &bull; 
                                 {{ $rep->submitted_at ? $rep->submitted_at->diffForHumans() : $rep->updated_at->diffForHumans() }}
                             </p>
                         </div>

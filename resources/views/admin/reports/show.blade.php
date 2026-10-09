@@ -16,14 +16,18 @@
                     <span class="px-2.5 py-0.5 rounded-full text-xs font-bold border {{ $report->status_badge_class }}">
                         {{ strtoupper(str_replace('_', ' ', $report->status)) }}
                     </span>
-                    <span class="text-xs text-slate-500 font-medium">Job: #{{ $report->service->service_number }}</span>
+                    @if($report->service)
+                        <span class="text-xs text-slate-500 font-medium">Job: #{{ $report->service->service_number }}</span>
+                    @else
+                        <span class="text-xs text-slate-500 font-medium">{{ $report->template?->name ?? 'Standalone Report' }}</span>
+                    @endif
                 </div>
                 <h2 class="text-xl font-extrabold text-slate-900 mt-2">
-                    {{ $report->customer->name }} &bull; {{ $report->site->name }}
+                    {{ $report->customer?->name ?? 'Internal Operations' }} &bull; {{ $report->site?->name ?? 'Field Site' }}
                 </h2>
                 <p class="text-xs text-slate-500 mt-0.5">
-                    Corporate Entity: <strong class="text-slate-800">{{ $report->company->name }} ({{ $report->company->code }})</strong> &bull;
-                    Engineer: <strong class="text-slate-800">{{ $report->engineer->name }}</strong>
+                    Corporate Entity: <strong class="text-slate-800">{{ $report->company?->name ?? 'System' }} ({{ $report->company?->code ?? 'SYS' }})</strong> &bull;
+                    Engineer: <strong class="text-slate-800">{{ $report->engineer?->name ?? 'Unassigned' }}</strong>
                 </p>
             </div>
 
@@ -92,7 +96,7 @@
                 <span class="text-amber-600 font-mono text-[11px]">{{ $sections['customer_details']['service_date'] ?? '—' }}</span>
             </h3>
             <div class="grid grid-cols-2 gap-3 text-xs">
-                <div><span class="text-slate-400 block text-[10px] uppercase font-semibold">Customer</span> <strong class="text-slate-800">{{ $report->customer->name }}</strong></div>
+                <div><span class="text-slate-400 block text-[10px] uppercase font-semibold">Customer</span> <strong class="text-slate-800">{{ $report->customer?->name ?? 'Internal / General' }}</strong></div>
                 <div><span class="text-slate-400 block text-[10px] uppercase font-semibold">Service Time</span> <strong class="text-slate-800">{{ $sections['customer_details']['service_time'] ?? '—' }}</strong></div>
                 <div><span class="text-slate-400 block text-[10px] uppercase font-semibold">Head Phone</span> {{ $sections['customer_details']['phone_head'] ?? '—' }}</div>
                 <div><span class="text-slate-400 block text-[10px] uppercase font-semibold">Site Incharge Phone</span> {{ $sections['customer_details']['phone_incharge'] ?? '—' }}</div>
@@ -239,7 +243,7 @@
     <div class="bg-white rounded-xl border border-slate-200 shadow-xs p-6">
         <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center justify-between">
             <span>Inspection & Cleaning Photographs ({{ $report->photos->count() }})</span>
-            <span class="text-xs text-slate-400 font-normal">Associated with Company: {{ $report->company->name }} &bull; Job: {{ $report->service->service_number }}</span>
+            <span class="text-xs text-slate-400 font-normal">Associated with Company: {{ $report->company?->name ?? 'System' }} &bull; Job: {{ $report->service?->service_number ?? 'Standalone' }}</span>
         </h3>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">

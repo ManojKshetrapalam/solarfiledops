@@ -229,6 +229,12 @@ class DataMigrationAndOnboardingTest extends TestCase
         $previewResponse->assertSee('Karthik Murthy');
         $previewResponse->assertSee('karthik'); // auto-generated username preview
 
+        $previewData = $previewResponse->viewData('previewData');
+        $this->assertEquals(2, $previewData['valid_count']);
+        $this->assertEquals(0, $previewData['error_count']);
+        $this->assertEquals('valid', $previewData['rows'][0]['status']);
+        $this->assertEquals('ENG-801', $previewData['rows'][0]['raw']['Employee Code']);
+
         $previewKey = $previewResponse->viewData('previewKey');
         $this->assertNotEmpty($previewKey);
 

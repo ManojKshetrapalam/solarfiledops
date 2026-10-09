@@ -504,7 +504,7 @@ class DataMigrationService
             $rowResult = $this->validateRow($type, $row, $headerMap, $r + 1, $seenIdentifiers, $seenEmails, $seenUsernames);
             $parsedRows[] = $rowResult;
 
-            if ($rowResult['status'] === 'ready') {
+            if ($rowResult['status'] === 'valid' || $rowResult['status'] === 'ready') {
                 $validCount++;
             } elseif ($rowResult['status'] === 'warning') {
                 $warningCount++;
@@ -546,6 +546,11 @@ class DataMigrationService
         array &$seenUsernames
     ): array {
         $get = fn($key) => isset($headerMap[$key]) ? trim((string)($row[$headerMap[$key]] ?? '')) : '';
+
+        $rawValues = [];
+        foreach ($headerMap as $hKey => $colIdx) {
+            $rawValues[$hKey] = isset($row[$colIdx]) ? trim((string)$row[$colIdx]) : '';
+        }
 
         $errors = [];
         $warnings = [];
@@ -863,6 +868,7 @@ class DataMigrationService
             'row_number' => $rowNumber,
             'status' => $status === 'ready' ? 'valid' : $status,
             'data' => $data,
+            'raw' => $rawValues,
             'generated_data' => $generatedData,
             'username' => $generatedData['username'] ?? ($data['username'] ?? null),
             'temp_password' => $generatedData['temporary_password'] ?? null,

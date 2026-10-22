@@ -70,7 +70,7 @@
     @if(!View::hasSection('hide_bottom_nav'))
         <nav class="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1 shadow-lg max-w-lg mx-auto"
              style="padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);">
-            <div class="grid grid-cols-5 gap-0.5">
+            <div class="grid grid-cols-5 gap-0.5 w-full" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));">
                 <a href="{{ route('engineer.dashboard') }}" 
                    class="flex flex-col items-center justify-center py-1.5 px-0.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-colors {{ request()->routeIs('engineer.dashboard') ? 'text-amber-600 font-bold' : 'text-slate-500 hover:text-slate-800' }}">
                     <svg class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -4,11 +4,40 @@
 
 @section('engineer_content')
 <div class="space-y-4">
+    <!-- Daily Worklog & Timesheet Action Card for Employees -->
+    <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-4 rounded-2xl shadow-sm border border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+            <div class="flex items-center gap-1.5 mb-1">
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-400">Employee Self-Service</span>
+            </div>
+            <h3 class="text-sm font-extrabold text-white leading-tight">Daily Worklog & Time Sheet</h3>
+            <p class="text-xs text-slate-300 mt-0.5">Create, log daily hours, tasks, meal allowance, conveyance and submit directly.</p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+            <a href="{{ route('engineer.daily-reports.create') }}" 
+               class="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 font-black text-xs rounded-xl shadow-sm flex items-center gap-1.5 transition-all">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>+ New Worklog</span>
+            </a>
+            <a href="{{ route('engineer.daily-reports.index') }}" 
+               class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl border border-slate-700 transition-all">
+                All Timesheets
+            </a>
+        </div>
+    </div>
+
     <!-- Status Filter Pills -->
     <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
         <a href="{{ route('engineer.reports.index') }}" 
-           class="px-3.5 py-1.5 rounded-full font-bold transition-colors whitespace-nowrap {{ !request('status') ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200' }}">
+           class="px-3.5 py-1.5 rounded-full font-bold transition-colors whitespace-nowrap {{ !request('status') && !request('template_slug') ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200' }}">
             All Reports
+        </a>
+        <a href="{{ route('engineer.reports.index', ['template_slug' => 'daily_work_report']) }}" 
+           class="px-3.5 py-1.5 rounded-full font-bold transition-colors whitespace-nowrap {{ request('template_slug') === 'daily_work_report' ? 'bg-amber-500 text-slate-950' : 'bg-white text-slate-600 border border-slate-200' }}">
+            Timesheets Only
         </a>
         <a href="{{ route('engineer.reports.index', ['status' => 'draft']) }}" 
            class="px-3.5 py-1.5 rounded-full font-bold transition-colors whitespace-nowrap {{ request('status') === 'draft' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200' }}">
@@ -42,10 +71,10 @@
                 </div>
 
                 <h4 class="text-sm font-bold text-slate-900 leading-tight">
-                    {{ $rep->customer->name }}
+                    {{ $rep->customer?->name ?? ($rep->template?->name ?? 'Daily Work Log / Timesheet') }}
                 </h4>
                 <p class="text-xs text-slate-500 font-medium mt-0.5">
-                    {{ $rep->site->name }} &bull; Step {{ $rep->current_step }} of 10
+                    {{ $rep->site?->name ?? ($rep->service ? 'Job #' . $rep->service->service_number : ($rep->company?->name ?? 'Field Timesheet')) }} &bull; {{ $rep->template?->name ?? ('Step ' . $rep->current_step) }}
                 </p>
 
                 @if($rep->status === 'correction_required' && $rep->correction_notes)

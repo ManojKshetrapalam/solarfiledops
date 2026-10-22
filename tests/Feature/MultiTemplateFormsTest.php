@@ -519,4 +519,83 @@ class MultiTemplateFormsTest extends TestCase
         $this->assertEquals('approved', $report->status);
         $this->assertEquals('completed', $report->service->status);
     }
+
+    public function test_engineer_can_create_fill_and_submit_daily_work_report(): void
+    {
+        $engineer = User::where('role', 'engineer')->first();
+        $this->actingAs($engineer);
+
+        // 1. Create a Daily Worklog
+        $createResponse = $this->post(route('engineer.daily-reports.create'));
+        $createResponse->assertRedirect();
+
+        $dailyReport = Report::where('engineer_id', $engineer->id)
+            ->whereHas('template', fn($q) => $q->where('slug', 'daily_work_report'))
+            ->latest('id')
+            ->firstOrFail();
+
+        $createResponse->assertRedirect(route('engineer.reports.edit', $dailyReport->id));
+        $this->assertEquals('draft', $dailyReport->status);
+        $this->assertNull($dailyReport->service_id);
+        $this->assertNull($dailyReport->customer_id);
+
+        // 2. Verify Engineer Reports Index renders without 500 error
+        $indexResponse = $this->get(route('engineer.reports.index'));
+        $indexResponse->assertOk();
+        $indexResponse->assertSee($dailyReport->report_number);
+        $indexResponse->assertSee('+ New Worklog');
+
+        // Timesheets Only filter
+        $filterResponse = $this->get(route('engineer.reports.index', ['template_slug' => 'daily_work_report']));
+        $filterResponse->assertOk();
+        $filterResponse->assertSee($dailyReport->report_number);
+
+        // 3. Save Draft Data
+        $draftPayload = [
+            'current_step' => 2,
+            'sections' => [
+                'shift_details' => [
+                    'employee_name' => $engineer->name,
+                    'designation' => 'Solar Operations Engineer',
+                    'report_date' => now()->toDateString(),
+                    'work_started_time' => '09:00',
+                    'work_stopped_time' => '18:30',
+                    'place_of_work' => 'Peenya Industrial Area Sites',
+                ],
+                'travel_conveyance' => [
+                    'mode_of_travel' => 'bike',
+                    'start_km' => 1250,
+                    'end_km' => 1295,
+                    'diff_km' => 45,
+                    'amount' => 225,
+                ],
+                'work_summary_signoff' => [
+                    'work_completed' => 'Completed preventive checks on inverters and string connections.',
+                    'pending_work' => 'Follow up on grounding pit resistance next Monday.',
+                ],
+            ],
+        ];
+
+        $saveResponse = $this->postJson(route('engineer.reports.save-draft', $dailyReport->id), $draftPayload);
+        $saveResponse->assertOk();
+        $saveResponse->assertJson(['success' => true]);
+
+        // 4. Submit Daily Report
+        $submitResponse = $this->post(route('engineer.reports.submit', $dailyReport->id), [
+            'current_step' => 5,
+        ]);
+        $submitResponse->assertRedirect(route('engineer.reports.show', $dailyReport->id));
+
+        $dailyReport->refresh();
+        $this->assertEquals('submitted', $dailyReport->status);
+        $this->assertNotNull($dailyReport->submitted_at);
+
+        // 5. Engineer Show View (dedicated daily work report template)
+        $showResponse = $this->get(route('engineer.reports.show', $dailyReport->id));
+        $showResponse->assertOk();
+        $showResponse->assertSee('Daily Worklog & Time Sheet', false);
+        $showResponse->assertSee('Peenya Industrial Area Sites');
+        $showResponse->assertSee('45 KM');
+    }
 }
+

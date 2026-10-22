@@ -44,7 +44,7 @@
         <!-- Draft status toast badge -->
         <div class="flex items-center justify-between text-[11px] mt-1.5 text-slate-400">
             <span x-text="saveStatus" :class="saveStatusColor"></span>
-            <span class="text-slate-400 truncate max-w-[200px]">{{ $report->customer->name }}</span>
+            <span class="text-slate-400 truncate max-w-[200px]">{{ $report->customer?->name ?? ($report->template?->name ?? 'Daily Worklog') }}</span>
         </div>
     </div>
 

@@ -251,19 +251,42 @@ class DatabaseSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // 4. Users (Admin + Engineers)
-        $admin = User::create([
-            'name' => 'Operations Admin',
-            'username' => 'admin',
-            'email' => 'admin@solar.local',
-            'password' => Hash::make('password123'),
-            'role' => 'admin',
-            'employee_code' => 'ADM-001',
-            'phone' => '+91 98000 00001',
-            'designation' => 'Operations Director',
-            'status' => 'active',
-            'joining_date' => '2024-01-01',
-        ]);
+        // 4. Users (Super Admin + Admin Operations + Engineers)
+        $superAdmin = User::firstOrCreate(
+            ['username' => 'superadmin'],
+            [
+                'name' => 'Super Administrator',
+                'email' => 'superadmin@solar.local',
+                'password' => Hash::make('SAdmin@123$$'),
+                'role' => 'super_admin',
+                'employee_code' => 'sadmin',
+                'phone' => '+91 98000 00000',
+                'designation' => 'Executive Director & Super Admin',
+                'status' => 'active',
+                'can_manage_content' => true,
+                'first_login_completed' => true,
+                'password_change_required' => false,
+                'joining_date' => '2024-01-01',
+            ]
+        );
+
+        $admin = User::firstOrCreate(
+            ['username' => 'admin'],
+            [
+                'name' => 'Operations Admin',
+                'email' => 'admin@solar.local',
+                'password' => Hash::make('Admin@123$$'),
+                'role' => 'admin_operations',
+                'employee_code' => 'ADM-001',
+                'phone' => '+91 98000 00001',
+                'designation' => 'Operations Director',
+                'status' => 'active',
+                'can_manage_content' => false,
+                'first_login_completed' => true,
+                'password_change_required' => false,
+                'joining_date' => '2024-01-01',
+            ]
+        );
 
         $raj = User::create([
             'name' => 'Raj Kumar',

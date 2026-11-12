@@ -30,7 +30,7 @@ class DataMigrationAndOnboardingTest extends TestCase
 
     public function test_admin_first_login_forces_password_change(): void
     {
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::where('username', 'admin')->first();
         $admin->password = Hash::make('TempAdmin@123');
         $admin->password_change_required = true;
         $admin->first_login_completed = false;
@@ -166,7 +166,7 @@ class DataMigrationAndOnboardingTest extends TestCase
 
     public function test_admin_can_download_migration_templates_and_zip(): void
     {
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereIn('role', ['admin', 'super_admin'])->first();
         $admin->password_change_required = false;
         $admin->save();
 
@@ -191,7 +191,7 @@ class DataMigrationAndOnboardingTest extends TestCase
 
     public function test_employee_excel_import_preview_and_confirm_workflow(): void
     {
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereIn('role', ['admin', 'super_admin'])->first();
         $admin->password_change_required = false;
         $admin->save();
 
@@ -276,7 +276,7 @@ class DataMigrationAndOnboardingTest extends TestCase
 
     public function test_customer_and_site_migration_resolves_relations(): void
     {
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereIn('role', ['admin', 'super_admin'])->first();
         $admin->password_change_required = false;
         $admin->save();
 
@@ -328,7 +328,7 @@ class DataMigrationAndOnboardingTest extends TestCase
 
     public function test_admin_can_reveal_and_regenerate_temporary_credentials(): void
     {
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereIn('role', ['admin', 'super_admin'])->first();
         $admin->password_change_required = false;
         $admin->save();
 
@@ -387,7 +387,7 @@ class DataMigrationAndOnboardingTest extends TestCase
 
     public function test_admin_reports_screens_render_successfully_with_standalone_reports(): void
     {
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereIn('role', ['admin', 'super_admin'])->first();
         $this->actingAs($admin);
 
         $template = \App\Models\ReportTemplate::first();

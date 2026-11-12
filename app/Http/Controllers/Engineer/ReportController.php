@@ -337,7 +337,7 @@ class ReportController extends Controller
         ]);
 
         // Notify Admins
-        $admins = User::where('role', 'admin')->where('status', 'active')->get();
+        $admins = User::whereIn('role', ['admin', 'super_admin', 'admin_operations'])->where('status', 'active')->get();
         $templateName = $report->template?->name ?? 'Service Report';
         $title = $isResubmission ? "{$templateName} Resubmitted" : "New {$templateName} Submitted";
         $customerInfo = $report->customer ? "for {$report->customer->name}" : '';

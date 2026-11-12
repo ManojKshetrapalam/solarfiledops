@@ -151,18 +151,6 @@
                 <span>Download Templates</span>
             </a>
             @endif
-
-            @if(auth()->user()->canManageContent())
-            <div class="pt-3 pb-1 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">Content & CMS</div>
-
-            <a href="{{ route('admin.content-manager.index') }}" 
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors {{ request()->routeIs('admin.content-manager.*') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 'hover:bg-slate-800 text-slate-300' }}">
-                <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                <span>@content('navigation.content_manager', 'Frontend Content Manager')</span>
-            </a>
-            @endif
         </nav>
 
         <!-- User profile in sidebar footer -->

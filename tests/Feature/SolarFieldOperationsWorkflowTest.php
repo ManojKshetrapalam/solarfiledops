@@ -30,7 +30,7 @@ class SolarFieldOperationsWorkflowTest extends TestCase
     public function test_complete_solar_field_operations_25_point_acceptance_workflow(): void
     {
         // 1. Admin logs in.
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereIn('role', ['admin', 'super_admin'])->first();
         $this->actingAs($admin);
 
         // 2. Admin creates "Sun on Earth" (or verifies existing entity).

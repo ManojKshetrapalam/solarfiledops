@@ -28,7 +28,7 @@ class MultiTemplateFormsTest extends TestCase
 
     public function test_admin_can_dispatch_installation_bundle_to_three_technicians(): void
     {
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereIn('role', ['admin', 'super_admin'])->first();
         $this->actingAs($admin);
 
         $company = Company::first();
@@ -197,7 +197,7 @@ class MultiTemplateFormsTest extends TestCase
         $this->assertEquals('submitted', $report3->status);
 
         // 4. Admin Review & Approval & Print
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereIn('role', ['admin', 'super_admin'])->first();
         $this->actingAs($admin);
 
         // Check Structure Review & Print
@@ -295,7 +295,7 @@ class MultiTemplateFormsTest extends TestCase
         $this->assertEquals('submitted', $dailyReport->status);
 
         // Admin reviews and approves
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereIn('role', ['admin', 'super_admin'])->first();
         $this->actingAs($admin);
 
         $adminShow = $this->get(route('admin.reports.show', $dailyReport->id));
@@ -367,7 +367,7 @@ class MultiTemplateFormsTest extends TestCase
         $this->assertEquals('submitted', $complaintReport->status);
 
         // Admin Review & Print for both
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereIn('role', ['admin', 'super_admin'])->first();
         $this->actingAs($admin);
 
         // Survey
@@ -498,7 +498,7 @@ class MultiTemplateFormsTest extends TestCase
         $engShow->assertSee('Quality of installation / work');
 
         // 4. Admin Verification & Approval
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::whereIn('role', ['admin', 'super_admin'])->first();
         $this->actingAs($admin);
 
         $adminShow = $this->get(route('admin.reports.show', $report->id));

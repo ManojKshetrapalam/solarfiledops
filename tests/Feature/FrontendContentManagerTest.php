@@ -43,7 +43,7 @@ class FrontendContentManagerTest extends TestCase
         $content = FrontendContent::where('key', 'navigation.technicians')->whereNull('company_id')->firstOrFail();
 
         // 1. Save draft
-        $response = $this->actingAs($superAdmin)->patch(route('admin.content-manager.update', $content->id), [
+        $response = $this->actingAs($superAdmin)->patch(route('cms.update', $content->id), [
             'custom_value' => 'Senior Solar Specialists',
         ]);
         $response->assertSessionHas('success');
@@ -59,7 +59,7 @@ class FrontendContentManagerTest extends TestCase
         session(['frontend_content_preview_mode' => false]);
 
         // 4. Publish draft live
-        $pubResponse = $this->actingAs($superAdmin)->post(route('admin.content-manager.publish', $content->id));
+        $pubResponse = $this->actingAs($superAdmin)->post(route('cms.publish', $content->id));
         $pubResponse->assertSessionHas('success');
 
         $content->refresh();
@@ -138,7 +138,7 @@ class FrontendContentManagerTest extends TestCase
     {
         // 1. Regular engineer cannot access CMS
         $engineer = User::where('role', 'engineer')->first();
-        $this->actingAs($engineer)->get(route('admin.content-manager.index'))->assertStatus(403);
+        $this->actingAs($engineer)->get(route('cms.index'))->assertStatus(403);
 
         // 2. Admin Operations WITHOUT can_manage_content is forbidden
         $opsAdmin = User::create([
@@ -152,10 +152,10 @@ class FrontendContentManagerTest extends TestCase
             'first_login_completed' => true,
         ]);
 
-        $this->actingAs($opsAdmin)->get(route('admin.content-manager.index'))->assertStatus(403);
+        $this->actingAs($opsAdmin)->get(route('cms.index'))->assertStatus(403);
 
         $content = FrontendContent::first();
-        $this->actingAs($opsAdmin)->patch(route('admin.content-manager.update', $content->id), [
+        $this->actingAs($opsAdmin)->patch(route('cms.update', $content->id), [
             'custom_value' => 'Hacked Wording',
         ])->assertStatus(403);
 
@@ -172,7 +172,7 @@ class FrontendContentManagerTest extends TestCase
             'first_login_completed' => true,
         ]);
 
-        $this->actingAs($clientManager)->get(route('admin.content-manager.index'))->assertStatus(200);
+        $this->actingAs($clientManager)->get(route('cms.index'))->assertStatus(200);
     }
 
     /**

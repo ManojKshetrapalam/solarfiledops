@@ -78,7 +78,18 @@ class AuthAndAccessTest extends TestCase
     {
         $response = $this->post('/login', [
             'email' => 'admin@solar.local',
-            'password' => 'password123',
+            'password' => 'Admin@123$$',
+        ]);
+
+        $response->assertRedirect(route('admin.dashboard'));
+        $this->assertAuthenticated();
+    }
+
+    public function test_super_admin_can_login_with_default_credentials(): void
+    {
+        $response = $this->post('/login', [
+            'login' => 'superadmin',
+            'password' => 'SAdmin@123$$',
         ]);
 
         $response->assertRedirect(route('admin.dashboard'));
@@ -108,7 +119,7 @@ class AuthAndAccessTest extends TestCase
     {
         $response = $this->post('/login', [
             'login' => 'admin',
-            'password' => 'password123',
+            'password' => 'Admin@123$$',
         ]);
 
         $response->assertRedirect(route('admin.dashboard'));

@@ -186,6 +186,10 @@
         </div>
     @endif
 
+    @php
+        $reportCompanyId = $report->company_id ?? $report->service?->company_id;
+    @endphp
+
     <!-- Official Sign-off Table -->
     <div class="border-2 border-slate-900 grid grid-cols-3 divide-x-2 divide-slate-900 text-center">
         <!-- Service Done By -->
@@ -193,7 +197,7 @@
             <span class="font-bold text-[10px] uppercase text-slate-500">Service Done By</span>
             <div class="my-auto">
                 <p class="font-bold text-sm text-slate-900">{{ $report->engineer->name }}</p>
-                <p class="text-[10px] text-slate-500">Service Engineer / Technician</p>
+                <p class="text-[10px] text-slate-500">{{ frontend_content('reports_print.service_engineer', 'Service Engineer / Technician', $reportCompanyId) }}</p>
             </div>
             <span class="text-[9px] text-slate-400 border-t pt-0.5">Engineer Signature & Date</span>
         </div>
@@ -211,18 +215,18 @@
                     <p class="text-[8px] text-emerald-700 font-semibold">(Work Inspected & Verified)</p>
                 @endif
             </div>
-            <span class="text-[9px] text-slate-400 border-t pt-0.5">Client Signature & Seal</span>
+            <span class="text-[9px] text-slate-400 border-t pt-0.5">{{ frontend_content('reports_print.client_signature', 'Client Signature & Seal', $reportCompanyId) }}</span>
         </div>
 
         <!-- For Office Use -->
         <div class="p-3 flex flex-col justify-between h-28 bg-slate-50/60">
-            <span class="font-bold text-[10px] uppercase text-slate-500">Verified by</span>
+            <span class="font-bold text-[10px] uppercase text-slate-500">{{ frontend_content('reports_print.verified_by', 'Verified by', $reportCompanyId) }}</span>
             <div class="my-auto">
-                <p class="font-bold text-sm text-slate-900">{{ $report->reviewer?->name ?? 'Admin Operations' }}</p>
+                <p class="font-bold text-sm text-slate-900">{{ $report->reviewer?->name ?? frontend_content('reports_print.admin_operations', 'Admin Operations', $reportCompanyId) }}</p>
                 <p class="text-[10px] text-emerald-700 font-semibold">{{ $report->isApproved() ? 'STATUS: APPROVED' : 'STATUS: ' . strtoupper($report->status) }}</p>
                 <p class="text-[9px] text-slate-400">{{ $report->approved_at?->format('d M Y, h:i A') }}</p>
             </div>
-            <span class="text-[9px] text-slate-400 border-t pt-0.5">Admin Operations</span>
+            <span class="text-[9px] text-slate-400 border-t pt-0.5">{{ frontend_content('reports_print.admin_operations', 'Admin Operations', $reportCompanyId) }}</span>
         </div>
     </div>
 </body>

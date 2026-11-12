@@ -386,5 +386,8 @@ class DatabaseSeeder extends Seeder
             'assigned_to' => $raj->name,
             'status' => 'assigned',
         ], $admin->id);
+
+        // 7. Seed Frontend Content & Terminology Dictionary
+        $this->call(FrontendContentSeeder::class);
     }
 }

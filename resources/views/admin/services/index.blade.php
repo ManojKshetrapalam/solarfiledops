@@ -7,7 +7,7 @@
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h2 class="text-lg font-bold text-slate-900">Service Operations & Maintenance</h2>
+            <h2 class="text-lg font-bold text-slate-900">@content('headings.services_index', 'Service Operations & Maintenance')</h2>
             <p class="text-xs text-slate-500">Create, schedule and assign solar field operations to engineers and technicians across companies.</p>
         </div>
         <a href="{{ route('admin.services.create') }}" 
@@ -15,7 +15,7 @@
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
             </svg>
-            <span>+ Create Service/ Maintainance</span>
+            <span>@content('buttons.create_service', '+ Create Service/ Maintainance')</span>
         </a>
     </div>
 

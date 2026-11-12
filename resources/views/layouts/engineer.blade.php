@@ -57,7 +57,7 @@
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 4.243a9 9 0 01-2.829-2.829m0 0L3 21m2.829-5.657a5 5 0 010-7.072m0 0l2.829 2.829" />
             </svg>
-            <span>Offline mode. Draft changes are stored locally on your device.</span>
+            <span>@content('mobile.offline_banner', 'Offline mode. Draft changes are stored locally on your device.')</span>
         </div>
     </header>
 
@@ -76,7 +76,7 @@
                     <svg class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                     </svg>
-                    <span>Home</span>
+                    <span>@content('mobile.home', 'Home')</span>
                 </a>
 
                 <a href="{{ route('engineer.services.index') }}" 
@@ -84,7 +84,7 @@
                     <svg class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
-                    <span>Jobs</span>
+                    <span>@content('mobile.jobs', 'Jobs')</span>
                 </a>
 
                 <a href="{{ route('engineer.daily-reports.index') }}" 
@@ -92,7 +92,7 @@
                     <svg class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span>Timesheet</span>
+                    <span>@content('mobile.timesheet', 'Timesheet')</span>
                 </a>
 
                 <a href="{{ route('engineer.reports.index') }}" 
@@ -100,7 +100,7 @@
                     <svg class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <span>Reports</span>
+                    <span>@content('mobile.reports', 'Reports')</span>
                 </a>
 
                 <a href="{{ route('engineer.profile') }}" 
@@ -108,7 +108,7 @@
                     <svg class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    <span>Profile</span>
+                    <span>@content('mobile.profile', 'Profile')</span>
                 </a>
             </div>
         </nav>

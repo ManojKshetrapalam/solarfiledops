@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\CompanyController;
+use App\Http\Controllers\Admin\ContentManagerController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DataManagementController;
@@ -108,7 +109,22 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/{notification}/read', [AdminNotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/mark-all-read', [AdminNotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+
+    // Frontend Content Manager (CMS)
+    Route::prefix('content-manager')->name('content-manager.')->middleware(['content_manager'])->group(function () {
+        Route::get('/', [ContentManagerController::class, 'index'])->name('index');
+        Route::patch('/{content}', [ContentManagerController::class, 'update'])->name('update');
+        Route::post('/{content}/publish', [ContentManagerController::class, 'publish'])->name('publish');
+        Route::post('/publish-all', [ContentManagerController::class, 'publishAll'])->name('publish-all');
+        Route::post('/{content}/reset', [ContentManagerController::class, 'reset'])->name('reset');
+        Route::get('/{content}/history', [ContentManagerController::class, 'history'])->name('history');
+        Route::post('/toggle-preview', [ContentManagerController::class, 'togglePreview'])->name('toggle-preview');
+        Route::post('/create-override', [ContentManagerController::class, 'createCompanyOverride'])->name('create-override');
+    });
 });
+
+// Client-side API for Frontend Content Dictionary
+Route::get('/api/frontend-content', [\App\Http\Controllers\Api\FrontendContentApiController::class, 'index'])->name('api.frontend-content');
 
 // Mobile Field Engineer Routes (Role: engineer or active staff)
 Route::prefix('engineer')->name('engineer.')->middleware(['auth', 'engineer'])->group(function () {

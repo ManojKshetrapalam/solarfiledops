@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Sun on Earth Solar Group - Field Operations & Management')</title>
+    <title>@yield('title', frontend_content('branding.app_name', 'Sun on Earth Solar Group') . ' - ' . frontend_content('branding.tagline', 'Field Operations & Management'))</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,6 +55,13 @@
     @endif
 
     @yield('content')
+
+    <script>
+        window.__FRONTEND_CONTENT__ = @json(\App\Services\FrontendContentService::getDictionaryForUser(auth()->user()));
+        window.frontendContent = function(key, fallback) {
+            return (window.__FRONTEND_CONTENT__ && window.__FRONTEND_CONTENT__[key]) ? window.__FRONTEND_CONTENT__[key] : (fallback || key);
+        };
+    </script>
 
     @stack('scripts')
 </body>

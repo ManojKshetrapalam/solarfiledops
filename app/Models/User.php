@@ -21,6 +21,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'can_manage_content',
         'employee_code',
         'phone',
         'designation',
@@ -50,6 +51,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'joining_date' => 'date',
+            'can_manage_content' => 'boolean',
             'password_change_required' => 'boolean',
             'first_login_completed' => 'boolean',
             'password_changed_at' => 'datetime',
@@ -62,7 +64,7 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return in_array($this->role, ['super_admin', 'admin', 'admin_operations'], true);
+        return in_array($this->role, ['super_admin', 'admin', 'admin_operations', 'content_manager'], true);
     }
 
     public function isSuperAdmin(): bool
@@ -73,6 +75,15 @@ class User extends Authenticatable
     public function isAdminOperations(): bool
     {
         return $this->role === 'admin_operations';
+    }
+
+    public function canManageContent(): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return (bool) ($this->can_manage_content ?? false) || $this->role === 'content_manager';
     }
 
     public function isEngineer(): bool

@@ -56,6 +56,11 @@ class Company extends Model
         return $this->hasMany(Service::class);
     }
 
+    public function frontendContents(): HasMany
+    {
+        return $this->hasMany(FrontendContent::class);
+    }
+
     public function reports(): HasMany
     {
         return $this->hasMany(Report::class);

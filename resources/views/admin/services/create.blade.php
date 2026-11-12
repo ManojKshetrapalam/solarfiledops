@@ -133,14 +133,14 @@
                 <!-- Assignment to Employee (Single Job) -->
                 <div class="bg-amber-50/60 p-4 rounded-xl border border-amber-200">
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-900 mb-1">
-                        Assign Field Engineer / Employee
+                        Assigned Engineers / Technicians
                     </label>
-                    <p class="text-xs text-slate-600 mb-2">The selected employee will receive an instant in-app assignment notification.</p>
+                    <p class="text-xs text-slate-600 mb-2">The selected technician will receive an instant in-app assignment notification.</p>
                     <select name="assigned_user_id" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white">
                         <option value="">-- Leave Unassigned (Assign Later) --</option>
                         @foreach($engineers as $eng)
                             <option value="{{ $eng->id }}" {{ old('assigned_user_id') == $eng->id ? 'selected' : '' }}>
-                                {{ $eng->name }} ({{ $eng->employee_code }}) - {{ $eng->company?->name ?? 'All Entities' }}
+                                {{ $eng->name }} ({{ $eng->employee_code }}) - {{ $eng->company?->name ?? 'All Companies' }}
                             </option>
                         @endforeach
                     </select>

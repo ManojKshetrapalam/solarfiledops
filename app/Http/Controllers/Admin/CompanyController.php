@@ -31,12 +31,18 @@ class CompanyController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'legal_name' => ['nullable', 'string', 'max:255'],
             'code' => ['required', 'string', 'max:10', 'unique:companies,code'],
             'contact_person' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:255'],
+            'website' => ['nullable', 'string', 'max:255'],
+            'registration_details' => ['nullable', 'string', 'max:255'],
+            'certification_info' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string'],
             'report_header_info' => ['nullable', 'string'],
+            'report_footer_info' => ['nullable', 'string'],
+            'brand_color' => ['nullable', 'string', 'max:20'],
             'logo' => ['nullable', 'image', 'max:2048'],
         ]);
 
@@ -62,12 +68,18 @@ class CompanyController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'legal_name' => ['nullable', 'string', 'max:255'],
             'code' => ['required', 'string', 'max:10', Rule::unique('companies', 'code')->ignore($company->id)],
             'contact_person' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:255'],
+            'website' => ['nullable', 'string', 'max:255'],
+            'registration_details' => ['nullable', 'string', 'max:255'],
+            'certification_info' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string'],
             'report_header_info' => ['nullable', 'string'],
+            'report_footer_info' => ['nullable', 'string'],
+            'brand_color' => ['nullable', 'string', 'max:20'],
             'logo' => ['nullable', 'image', 'max:2048'],
             'is_active' => ['boolean'],
         ]);

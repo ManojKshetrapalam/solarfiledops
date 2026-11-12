@@ -1,15 +1,16 @@
 @extends('layouts.admin')
 
-@section('title', 'Company & Entity Management - SolarOps')
-@section('header_title', 'Companies & Entities')
+@section('title', 'Companies Management - Sun on Earth Solar Group')
+@section('header_title', 'Companies')
 
 @section('admin_content')
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h2 class="text-lg font-bold text-slate-900">Registered Corporate Entities</h2>
-            <p class="text-xs text-slate-500">Manage multiple legal entities (e.g. Sun on Earth, Sabha) for isolated operations and reporting.</p>
+            <h2 class="text-lg font-bold text-slate-900">Registered Companies</h2>
+            <p class="text-xs text-slate-500">Manage multiple legal Companies for isolated operations and reporting.</p>
         </div>
+        @if(auth()->user()->isSuperAdmin())
         <a href="{{ route('admin.companies.create') }}" 
            class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl shadow-xs transition-all">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -17,6 +18,7 @@
             </svg>
             <span>Add New Company</span>
         </a>
+        @endif
     </div>
 
     <!-- Companies Grid / Table -->
@@ -25,7 +27,7 @@
             <table class="w-full text-left border-collapse text-xs">
                 <thead>
                     <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
-                        <th class="py-3.5 px-4">Entity</th>
+                        <th class="py-3.5 px-4">Company</th>
                         <th class="py-3.5 px-4">Contact Info</th>
                         <th class="py-3.5 px-4">Employees</th>
                         <th class="py-3.5 px-4">Customers</th>
@@ -75,6 +77,7 @@
                                 @endif
                             </td>
                             <td class="py-3 px-4 text-right">
+                                @if(auth()->user()->isSuperAdmin())
                                 <div class="flex items-center justify-end gap-2">
                                     <a href="{{ route('admin.companies.edit', $company->id) }}" 
                                        class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition-colors">
@@ -88,6 +91,9 @@
                                         </button>
                                     </form>
                                 </div>
+                                @else
+                                <span class="text-[11px] text-slate-400 font-medium">Read Only</span>
+                                @endif
                             </td>
                         </tr>
                     @empty

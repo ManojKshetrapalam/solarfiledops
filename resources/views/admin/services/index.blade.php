@@ -1,21 +1,21 @@
 @extends('layouts.admin')
 
-@section('title', 'Service & Job Management - SolarOps')
-@section('header_title', 'Field Services & Jobs')
+@section('title', 'Service & Maintenance - Sun on Earth Solar Group')
+@section('header_title', 'Service & Maintenance')
 
 @section('admin_content')
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h2 class="text-lg font-bold text-slate-900">Field Service Orders & Job Dispatch</h2>
-            <p class="text-xs text-slate-500">Create, schedule and assign solar field operations to engineers across corporate entities.</p>
+            <h2 class="text-lg font-bold text-slate-900">Service Operations & Maintenance</h2>
+            <p class="text-xs text-slate-500">Create, schedule and assign solar field operations to engineers and technicians across companies.</p>
         </div>
         <a href="{{ route('admin.services.create') }}" 
            class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl shadow-xs transition-all">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
             </svg>
-            <span>Create New Service Job</span>
+            <span>+ Create Service/ Maintainance</span>
         </a>
     </div>
 
@@ -29,7 +29,7 @@
             </div>
 
             <div>
-                <label class="block font-bold text-slate-600 mb-1">Company / Entity</label>
+                <label class="block font-bold text-slate-600 mb-1">Company</label>
                 <select name="company_id" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     <option value="">All Companies</option>
                     @foreach($companies as $c)

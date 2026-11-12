@@ -27,7 +27,8 @@ class CustomerController extends Controller
                 $q->where('name', 'like', "%{$s}%")
                   ->orWhere('contact_person', 'like', "%{$s}%")
                   ->orWhere('phone', 'like', "%{$s}%")
-                  ->orWhere('email', 'like', "%{$s}%");
+                  ->orWhere('email', 'like', "%{$s}%")
+                  ->orWhereHas('company', fn($cq) => $cq->where('name', 'like', "%{$s}%")->orWhere('code', 'like', "%{$s}%"));
             });
         }
 
@@ -52,6 +53,7 @@ class CustomerController extends Controller
             'phone' => ['required', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:255'],
             'address' => ['nullable', 'string'],
+            'customer_type' => ['nullable', 'string', 'in:domestic,non_domestic,institutions'],
         ]);
 
         $validated['status'] = 'active';
@@ -83,6 +85,7 @@ class CustomerController extends Controller
             'phone' => ['required', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:255'],
             'address' => ['nullable', 'string'],
+            'customer_type' => ['nullable', 'string', 'in:domestic,non_domestic,institutions'],
             'status' => ['required', 'in:active,inactive'],
         ]);
 

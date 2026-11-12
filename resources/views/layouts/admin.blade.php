@@ -18,8 +18,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h1 class="text-white font-bold text-base leading-tight tracking-tight">SolarOps</h1>
-                    <p class="text-[10px] text-amber-400 font-semibold tracking-wider uppercase">Field Management</p>
+                    <h1 class="text-white font-bold text-base leading-tight tracking-tight">Sun on Earth</h1>
+                    <p class="text-[10px] text-amber-400 font-semibold tracking-wider uppercase">Solar Group</p>
                 </div>
             </div>
             <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-white">✕</button>
@@ -42,7 +42,7 @@
                 <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
-                <span>Companies / Entities</span>
+                <span>Companies</span>
             </a>
 
             <a href="{{ route('admin.employees.index') }}" 
@@ -50,7 +50,7 @@
                 <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
-                <span>Employees / Engineers</span>
+                <span>Engineers / Technicians</span>
             </a>
 
             <a href="{{ route('admin.customers.index') }}" 
@@ -67,10 +67,10 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span>Sites</span>
+                <span>Solar Plants / Systems</span>
             </a>
 
-            <div class="pt-3 pb-1 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">Field Operations</div>
+            <div class="pt-3 pb-1 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">Service Operations & Maintenance</div>
 
             <a href="{{ route('admin.services.index') }}" 
                class="flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors {{ request()->routeIs('admin.services.*') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 'hover:bg-slate-800 text-slate-300' }}">
@@ -78,7 +78,7 @@
                     <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
-                    <span>Services / Jobs</span>
+                    <span>Service & Maintenance</span>
                 </div>
             </a>
 
@@ -88,7 +88,7 @@
                     <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <span>Reports & Review</span>
+                    <span>Maintenance & Service Reports</span>
                 </div>
             </a>
 
@@ -116,6 +116,7 @@
                 @endif
             </a>
 
+            @if(auth()->user()->isSuperAdmin())
             <a href="{{ route('admin.audit-logs') }}" 
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors {{ request()->routeIs('admin.audit-logs') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 'hover:bg-slate-800 text-slate-300' }}">
                 <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -149,6 +150,7 @@
                 </svg>
                 <span>Download Templates</span>
             </a>
+            @endif
         </nav>
 
         <!-- User profile in sidebar footer -->
@@ -200,8 +202,8 @@
                 </a>
 
                 <div class="hidden sm:flex items-center gap-2 pl-3 border-l border-slate-200">
-                    <span class="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full font-medium border border-slate-200">
-                        Admin Portal
+                    <span class="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full font-semibold border border-slate-200">
+                        {{ auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()->isAdminOperations() ? 'Admin Operations' : 'Administrator') }}
                     </span>
                 </div>
             </div>

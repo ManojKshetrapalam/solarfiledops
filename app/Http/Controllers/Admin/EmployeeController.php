@@ -78,7 +78,9 @@ class EmployeeController extends Controller
             'phone' => ['required', 'string', 'max:50'],
             'designation' => ['required', 'string', 'max:255'],
             'company_id' => ['nullable', 'exists:companies,id'],
-            'role' => ['required', 'in:admin,engineer'],
+            'company_ids' => ['nullable', 'array'],
+            'company_ids.*' => ['exists:companies,id'],
+            'role' => ['required', 'in:super_admin,admin,admin_operations,engineer'],
             'joining_date' => ['nullable', 'date'],
             'profile_photo' => ['nullable', 'image', 'max:2048'],
         ]);
@@ -87,6 +89,8 @@ class EmployeeController extends Controller
             $validated['profile_photo_path'] = $request->file('profile_photo')->store('employees/photos', 'public');
         }
         unset($validated['profile_photo']);
+        $companyIds = $request->input('company_ids', []);
+        unset($validated['company_ids']);
 
         $plainPassword = $validated['password'];
         $validated['password'] = Hash::make($plainPassword);
@@ -106,6 +110,26 @@ class EmployeeController extends Controller
             $employee->first_login_completed = true;
         }
         $employee->save();
+
+        // Sync company_user pivot memberships
+        if (!empty($companyIds)) {
+            $syncData = [];
+            $primaryCompanyId = $employee->company_id ?: $companyIds[0];
+            foreach ($companyIds as $cId) {
+                $syncData[$cId] = [
+                    'role_in_company' => $employee->role === 'admin_operations' ? 'admin_operations' : 'engineer',
+                    'is_primary' => ((int)$cId === (int)$primaryCompanyId),
+                ];
+            }
+            $employee->companies()->sync($syncData);
+        } elseif (!empty($employee->company_id)) {
+            $employee->companies()->sync([
+                $employee->company_id => [
+                    'role_in_company' => $employee->role === 'admin_operations' ? 'admin_operations' : 'engineer',
+                    'is_primary' => true,
+                ],
+            ]);
+        }
 
         AuditLog::log($employee, 'created', "Employee '{$employee->name}' ({$employee->employee_code}) was created by Admin with temporary credentials");
 
@@ -132,6 +156,7 @@ class EmployeeController extends Controller
     public function edit(User $employee): View
     {
         $companies = Company::where('is_active', true)->get();
+        $employee->load('companies');
         return view('admin.employees.edit', compact('employee', 'companies'));
     }
 
@@ -144,7 +169,9 @@ class EmployeeController extends Controller
             'phone' => ['required', 'string', 'max:50'],
             'designation' => ['required', 'string', 'max:255'],
             'company_id' => ['nullable', 'exists:companies,id'],
-            'role' => ['required', 'in:admin,engineer'],
+            'company_ids' => ['nullable', 'array'],
+            'company_ids.*' => ['exists:companies,id'],
+            'role' => ['required', 'in:super_admin,admin,admin_operations,engineer'],
             'joining_date' => ['nullable', 'date'],
             'status' => ['required', 'in:active,inactive'],
             'profile_photo' => ['nullable', 'image', 'max:2048'],
@@ -157,9 +184,31 @@ class EmployeeController extends Controller
             $validated['profile_photo_path'] = $request->file('profile_photo')->store('employees/photos', 'public');
         }
         unset($validated['profile_photo']);
+        $companyIds = $request->input('company_ids', []);
+        unset($validated['company_ids']);
 
         $old = $employee->toArray();
         $employee->update($validated);
+
+        // Sync company_user pivot memberships
+        if (!empty($companyIds)) {
+            $syncData = [];
+            $primaryCompanyId = $employee->company_id ?: $companyIds[0];
+            foreach ($companyIds as $cId) {
+                $syncData[$cId] = [
+                    'role_in_company' => $employee->role === 'admin_operations' ? 'admin_operations' : 'engineer',
+                    'is_primary' => ((int)$cId === (int)$primaryCompanyId),
+                ];
+            }
+            $employee->companies()->sync($syncData);
+        } elseif (!empty($employee->company_id)) {
+            $employee->companies()->sync([
+                $employee->company_id => [
+                    'role_in_company' => $employee->role === 'admin_operations' ? 'admin_operations' : 'engineer',
+                    'is_primary' => true,
+                ],
+            ]);
+        }
 
         AuditLog::log($employee, 'updated', "Employee '{$employee->name}' updated", $old, $employee->toArray());
 

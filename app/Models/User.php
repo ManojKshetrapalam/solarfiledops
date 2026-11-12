@@ -62,7 +62,17 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return in_array($this->role, ['super_admin', 'admin', 'admin_operations'], true);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return in_array($this->role, ['super_admin', 'admin'], true);
+    }
+
+    public function isAdminOperations(): bool
+    {
+        return $this->role === 'admin_operations';
     }
 
     public function isEngineer(): bool
@@ -78,6 +88,61 @@ class User extends Authenticatable
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function companies(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Company::class, 'company_user')
+            ->withPivot('role_in_company', 'is_primary')
+            ->withTimestamps();
+    }
+
+    public function getPrimaryCompanyAttribute(): ?Company
+    {
+        $primary = $this->companies()->wherePivot('is_primary', true)->first();
+        return $primary ?: $this->company;
+    }
+
+    public function canAccessCompany(int|string $companyId): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->companies()->where('company_id', $companyId)->exists();
+    }
+
+    public function canAdministerCompany(int|string $companyId): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($this->isAdminOperations()) {
+            $pivotRole = $this->companies()->where('company_id', $companyId)->value('company_user.role_in_company');
+            if ($pivotRole === 'admin_operations') {
+                return true;
+            }
+            if ($this->companies()->where('company_id', $companyId)->exists()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function canPerformEngineerActions(int|string $companyId): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        $pivot = $this->companies()->where('company_id', $companyId)->first();
+        if ($pivot && $pivot->pivot->role_in_company === 'engineer') {
+            return true;
+        }
+
+        return $this->isEngineer() && ($this->company_id == $companyId || $this->companies()->where('company_id', $companyId)->exists());
     }
 
     public function assignedServices(): HasMany

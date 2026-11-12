@@ -33,31 +33,67 @@ Route::middleware('auth')->group(function () {
     Route::post('/auth/change-password', [AuthController::class, 'updatePassword'])->name('auth.change-password.update');
 });
 
-// Admin Routes (Role: admin)
+// Admin Routes (Role: super_admin, admin, admin_operations)
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/setup-wizard', [AuthController::class, 'setupWizard'])->name('setup-wizard');
 
-    // Companies
-    Route::resource('companies', CompanyController::class)->except(['show', 'destroy']);
-    Route::post('/companies/{company}/toggle-status', [CompanyController::class, 'toggleStatus'])->name('companies.toggle-status');
+    // Companies: index is accessible by both Super Admin and Admin Operations (read-only company info)
+    Route::get('/companies', [CompanyController::class, 'index'])->name('companies.index');
 
-    // Employees
-    Route::resource('employees', EmployeeController::class)->except(['destroy']);
-    Route::post('/employees/{employee}/reset-password', [EmployeeController::class, 'resetPassword'])->name('employees.reset-password');
-    Route::post('/employees/{employee}/regenerate-temp-password', [EmployeeController::class, 'regenerateTemporaryPassword'])->name('employees.regenerate-temp-password');
-    Route::post('/employees/{employee}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('employees.toggle-status');
+    // Employees / Technicians: index is viewable by both (operational assignment & list of staff)
+    Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
+
+    // Super Admin Only: Company creation/editing, Employee creation/management, Data Imports, Audit Logs
+    Route::middleware('super_admin')->group(function () {
+        Route::get('/companies/create', [CompanyController::class, 'create'])->name('companies.create');
+        Route::post('/companies', [CompanyController::class, 'store'])->name('companies.store');
+        Route::get('/companies/{company}/edit', [CompanyController::class, 'edit'])->name('companies.edit');
+        Route::put('/companies/{company}', [CompanyController::class, 'update'])->name('companies.update');
+        Route::patch('/companies/{company}', [CompanyController::class, 'update']);
+        Route::post('/companies/{company}/toggle-status', [CompanyController::class, 'toggleStatus'])->name('companies.toggle-status');
+
+        Route::get('/employees/create', [EmployeeController::class, 'create'])->name('employees.create');
+        Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
+        Route::get('/employees/{employee}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
+        Route::put('/employees/{employee}', [EmployeeController::class, 'update'])->name('employees.update');
+        Route::patch('/employees/{employee}', [EmployeeController::class, 'update']);
+        Route::post('/employees/{employee}/reset-password', [EmployeeController::class, 'resetPassword'])->name('employees.reset-password');
+        Route::post('/employees/{employee}/regenerate-temp-password', [EmployeeController::class, 'regenerateTemporaryPassword'])->name('employees.regenerate-temp-password');
+        Route::post('/employees/{employee}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('employees.toggle-status');
+
+        Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs');
+
+        // Data Management & Migration (System settings / Excel migrations)
+        Route::prefix('data-management')->name('data-management.')->group(function () {
+            Route::get('/', [DataManagementController::class, 'index'])->name('index');
+            Route::get('/templates', [DataManagementController::class, 'templates'])->name('templates');
+            Route::get('/templates/all', [DataManagementController::class, 'downloadAllTemplates'])->name('download-all-templates');
+            Route::get('/templates/{type}', [DataManagementController::class, 'downloadTemplate'])->name('download-template');
+            Route::post('/preview', [DataManagementController::class, 'preview'])->name('preview');
+            Route::post('/confirm', [DataManagementController::class, 'confirm'])->name('confirm');
+            Route::get('/error-report/{import?}', [DataManagementController::class, 'downloadErrorReport'])->name('download-error-report');
+            Route::get('/credential-sheet/{import?}', [DataManagementController::class, 'downloadCredentialSheet'])->name('download-credential-sheet');
+            Route::get('/history', [DataManagementController::class, 'history'])->name('history');
+            Route::get('/history/{import}', [DataManagementController::class, 'showHistory'])->name('history.show');
+            Route::post('/audit-copy-credential', [DataManagementController::class, 'auditCopyCredential'])->name('audit-copy-credential');
+            Route::get('/reveal-credential/{employee}', [DataManagementController::class, 'revealCredential'])->name('reveal-credential');
+        });
+    });
+
+    // Employee show (accessible by both Super Admin and Admin Operations after 'create' route)
+    Route::get('/employees/{employee}', [EmployeeController::class, 'show'])->name('employees.show');
 
     // Customers & Sites
     Route::resource('customers', CustomerController::class)->except(['destroy']);
     Route::resource('sites', SiteController::class)->except(['destroy']);
 
-    // Services
+    // Services (dispatch & assign)
     Route::resource('services', AdminServiceController::class)->except(['destroy', 'edit', 'update']);
     Route::post('/services/{service}/assign', [AdminServiceController::class, 'assign'])->name('services.assign');
     Route::post('/services/{service}/status', [AdminServiceController::class, 'updateStatus'])->name('services.update-status');
 
-    // Reports Review & Verification
+    // Reports Review & Verification (approve, reject, request-correction, print)
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/{report}', [AdminReportController::class, 'show'])->name('reports.show');
     Route::post('/reports/{report}/approve', [AdminReportController::class, 'approve'])->name('reports.approve');
@@ -72,25 +108,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/{notification}/read', [AdminNotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/mark-all-read', [AdminNotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
-
-    // Audit Logs
-    Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs');
-
-    // Data Management & Migration
-    Route::prefix('data-management')->name('data-management.')->group(function () {
-        Route::get('/', [DataManagementController::class, 'index'])->name('index');
-        Route::get('/templates', [DataManagementController::class, 'templates'])->name('templates');
-        Route::get('/templates/all', [DataManagementController::class, 'downloadAllTemplates'])->name('download-all-templates');
-        Route::get('/templates/{type}', [DataManagementController::class, 'downloadTemplate'])->name('download-template');
-        Route::post('/preview', [DataManagementController::class, 'preview'])->name('preview');
-        Route::post('/confirm', [DataManagementController::class, 'confirm'])->name('confirm');
-        Route::get('/error-report/{import?}', [DataManagementController::class, 'downloadErrorReport'])->name('download-error-report');
-        Route::get('/credential-sheet/{import?}', [DataManagementController::class, 'downloadCredentialSheet'])->name('download-credential-sheet');
-        Route::get('/history', [DataManagementController::class, 'history'])->name('history');
-        Route::get('/history/{import}', [DataManagementController::class, 'showHistory'])->name('history.show');
-        Route::post('/audit-copy-credential', [DataManagementController::class, 'auditCopyCredential'])->name('audit-copy-credential');
-        Route::get('/reveal-credential/{employee}', [DataManagementController::class, 'revealCredential'])->name('reveal-credential');
-    });
 });
 
 // Mobile Field Engineer Routes (Role: engineer or active staff)

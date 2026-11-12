@@ -30,16 +30,19 @@
     <div class="border-2 border-slate-900 p-4 mb-4">
         <div class="flex items-start justify-between border-b-2 border-slate-900 pb-3 mb-3">
             <div>
-                <h1 class="text-xl font-extrabold tracking-tight uppercase">{{ $report->company->name }}</h1>
-                <p class="text-[11px] text-slate-600 max-w-lg mt-0.5">{{ $report->company->report_header_info ?? $report->company->address }}</p>
+                <h1 class="text-xl font-extrabold tracking-tight uppercase">{{ $report->company->legal_name ?: $report->company->name }}</h1>
+                <p class="text-[11px] text-slate-600 max-w-lg mt-0.5">{{ $report->company->report_header_info ?? ($report->company->certification_info ? $report->company->certification_info . ' | ' . $report->company->website : $report->company->address) }}</p>
                 <p class="text-[10px] text-slate-500">Phone: {{ $report->company->phone ?? '—' }} | Email: {{ $report->company->email ?? '—' }}</p>
             </div>
             <div class="text-right">
                 <span class="inline-block px-3 py-1 bg-slate-900 text-white font-extrabold text-sm uppercase tracking-wider rounded">
                     SERVICE REPORT
                 </span>
-                <p class="font-mono font-bold text-xs mt-1">NO: {{ $report->report_number }}</p>
-                <p class="text-[10px] text-slate-500">Job: #{{ $report->service?->service_number ?? 'N/A' }}</p>
+                @if($report->service)
+                    <p class="font-mono font-bold text-xs mt-1">Job: #{{ $report->service->service_number }}</p>
+                @else
+                    <p class="font-mono font-bold text-xs mt-1">Job: #{{ $report->report_number }}</p>
+                @endif
             </div>
         </div>
 
@@ -50,6 +53,9 @@
                 <p class="font-bold text-sm text-slate-900">{{ $report->customer?->name ?? 'Internal / General Operations' }}</p>
                 <p class="text-slate-700 mt-0.5">{{ $report->site?->name ?? 'General Site' }}</p>
                 <p class="text-slate-600 text-[11px]">{{ $report->site?->address ?? '' }}</p>
+                @if($report->customer?->phone)
+                    <p class="text-slate-700 font-semibold text-[11px] mt-0.5">Phone: {{ $report->customer->phone }}</p>
+                @endif
             </div>
 
             <div class="border border-slate-300 p-2.5 rounded bg-slate-50/50 space-y-1">
@@ -187,8 +193,7 @@
             <span class="font-bold text-[10px] uppercase text-slate-500">Service Done By</span>
             <div class="my-auto">
                 <p class="font-bold text-sm text-slate-900">{{ $report->engineer->name }}</p>
-                <p class="text-[10px] text-slate-500">{{ $report->engineer->designation }}</p>
-                <p class="text-[9px] font-mono text-slate-400">ID: {{ $report->engineer->employee_code }}</p>
+                <p class="text-[10px] text-slate-500">Service Engineer / Technician</p>
             </div>
             <span class="text-[9px] text-slate-400 border-t pt-0.5">Engineer Signature & Date</span>
         </div>
@@ -211,13 +216,13 @@
 
         <!-- For Office Use -->
         <div class="p-3 flex flex-col justify-between h-28 bg-slate-50/60">
-            <span class="font-bold text-[10px] uppercase text-slate-500">For Office Use / Approved By</span>
+            <span class="font-bold text-[10px] uppercase text-slate-500">Verified by</span>
             <div class="my-auto">
-                <p class="font-bold text-sm text-slate-900">{{ $report->reviewer?->name ?? 'Authorized Signatory' }}</p>
+                <p class="font-bold text-sm text-slate-900">{{ $report->reviewer?->name ?? 'Admin Operations' }}</p>
                 <p class="text-[10px] text-emerald-700 font-semibold">{{ $report->isApproved() ? 'STATUS: APPROVED' : 'STATUS: ' . strtoupper($report->status) }}</p>
                 <p class="text-[9px] text-slate-400">{{ $report->approved_at?->format('d M Y, h:i A') }}</p>
             </div>
-            <span class="text-[9px] text-slate-400 border-t pt-0.5">Operations Director</span>
+            <span class="text-[9px] text-slate-400 border-t pt-0.5">Admin Operations</span>
         </div>
     </div>
 </body>

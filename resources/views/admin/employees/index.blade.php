@@ -1,15 +1,16 @@
 @extends('layouts.admin')
 
-@section('title', 'Employee & Engineer Management - SolarOps')
-@section('header_title', 'Field Engineers & Staff')
+@section('title', 'Engineers & Technicians - Sun on Earth Solar Group')
+@section('header_title', 'Engineers / Technicians')
 
 @section('admin_content')
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h2 class="text-lg font-bold text-slate-900">Field Engineers & Operations Personnel</h2>
-            <p class="text-xs text-slate-500">Manage field staff credentials, entity assignments, designations, and track active workloads.</p>
+            <h2 class="text-lg font-bold text-slate-900">Field Engineers & Technicians</h2>
+            <p class="text-xs text-slate-500">Manage field staff credentials, company assignments, designations, and track active workloads.</p>
         </div>
+        @if(auth()->user()->isSuperAdmin())
         <a href="{{ route('admin.employees.create') }}" 
            class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl shadow-xs transition-all">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -17,6 +18,7 @@
             </svg>
             <span>Add New Employee</span>
         </a>
+        @endif
     </div>
 
     <!-- Filters & Search -->
@@ -131,10 +133,12 @@
                                        class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition-colors">
                                         Profile
                                     </a>
+                                    @if(auth()->user()->isSuperAdmin())
                                     <a href="{{ route('admin.employees.edit', $emp->id) }}" 
                                        class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition-colors">
                                         Edit
                                     </a>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

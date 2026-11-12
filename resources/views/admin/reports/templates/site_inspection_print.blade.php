@@ -30,8 +30,8 @@
     <div class="border-2 border-slate-900 p-4 mb-4">
         <div class="flex items-start justify-between border-b-2 border-slate-900 pb-3 mb-3">
             <div>
-                <h1 class="text-xl font-extrabold tracking-tight uppercase">{{ $report->company->name }}</h1>
-                <p class="text-[11px] text-slate-600 max-w-lg mt-0.5">{{ $report->company->report_header_info ?? $report->company->address }}</p>
+                <h1 class="text-xl font-extrabold tracking-tight uppercase">{{ $report->company->legal_name ?: $report->company->name }}</h1>
+                <p class="text-[11px] text-slate-600 max-w-lg mt-0.5">{{ $report->company->report_header_info ?? ($report->company->certification_info ? $report->company->certification_info . ' | ' . $report->company->website : $report->company->address) }}</p>
                 <p class="text-[10px] text-slate-500">Phone: {{ $report->company->phone ?? '—' }} | Email: {{ $report->company->email ?? '—' }}</p>
             </div>
             <div class="text-right">
@@ -85,13 +85,31 @@
             <!-- 1. Contacts & Site Directory -->
             <div>
                 <h3 class="font-bold text-[11px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1 mb-1.5">
-                    1. Site Contacts Directory
+                    1. Site Contacts & Authorized Persons
                 </h3>
-                <div class="grid grid-cols-4 gap-2 text-[10px]">
-                    <div><span class="text-slate-500 block text-[9px]">Client Contact:</span> {{ $sections['customer_site_details']['client_contact'] ?? '—' }}</div>
-                    <div><span class="text-slate-500 block text-[9px]">Main Incharge:</span> {{ $sections['customer_site_details']['main_incharge'] ?? '—' }}</div>
-                    <div><span class="text-slate-500 block text-[9px]">Site Incharge:</span> {{ $sections['customer_site_details']['site_incharge'] ?? '—' }}</div>
-                    <div><span class="text-slate-500 block text-[9px]">Caretaker / Security:</span> {{ $sections['customer_site_details']['caretaker_contact'] ?? '—' }}</div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px]">
+                    <div class="border border-slate-200 p-2 rounded bg-slate-50">
+                        <span class="text-slate-500 font-bold block text-[9px] uppercase">Customer Contact (Authority)</span>
+                        <p class="font-semibold text-slate-900">{{ $sections['customer_site_details']['client_contact'] ?? '—' }}</p>
+                        <p class="text-slate-500 text-[9px]">Desgn: {{ $sections['customer_site_details']['client_contact_desgn'] ?? 'Management / Incharge' }}</p>
+                        <p class="text-slate-500 text-[9px]">Phone: {{ $sections['customer_site_details']['client_contact_phone'] ?? ($sections['customer_site_details']['client_contact'] ?? '—') }}</p>
+                    </div>
+                    <div class="border border-slate-200 p-2 rounded bg-slate-50">
+                        <span class="text-slate-500 font-bold block text-[9px] uppercase">Authorised / Incharge</span>
+                        <p class="font-semibold text-slate-900">{{ $sections['customer_site_details']['main_incharge'] ?? '—' }}</p>
+                        <p class="text-slate-500 text-[9px]">Desgn: {{ $sections['customer_site_details']['main_incharge_desgn'] ?? 'Plant Incharge' }}</p>
+                        <p class="text-slate-500 text-[9px]">Phone: {{ $sections['customer_site_details']['main_incharge_phone'] ?? ($sections['customer_site_details']['main_incharge'] ?? '—') }}</p>
+                    </div>
+                    <div class="border border-slate-200 p-2 rounded bg-slate-50">
+                        <span class="text-slate-500 font-bold block text-[9px] uppercase">Site Incharge</span>
+                        <p class="font-semibold text-slate-900">{{ $sections['customer_site_details']['site_incharge'] ?? '—' }}</p>
+                        <p class="text-slate-500 text-[9px]">Technical Coordinator</p>
+                    </div>
+                    <div class="border border-slate-200 p-2 rounded bg-slate-50">
+                        <span class="text-slate-500 font-bold block text-[9px] uppercase">Caretaker / Security</span>
+                        <p class="font-semibold text-slate-900">{{ $sections['customer_site_details']['caretaker_contact'] ?? '—' }}</p>
+                        <p class="text-slate-500 text-[9px]">On-site Staff</p>
+                    </div>
                 </div>
             </div>
 

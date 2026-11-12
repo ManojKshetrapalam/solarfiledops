@@ -1,13 +1,13 @@
 @extends('layouts.admin')
 
-@section('title', 'Customer Management - SolarOps')
+@section('title', 'Customer Management - Sun on Earth Solar Group')
 @section('header_title', 'Customers')
 
 @section('admin_content')
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h2 class="text-lg font-bold text-slate-900">Commercial & Industrial Clients</h2>
+            <h2 class="text-lg font-bold text-slate-900">Domestic / Non-domestic & Institutions</h2>
             <p class="text-xs text-slate-500">Solar installations are linked to customers, and each customer can have multiple physical plant sites.</p>
         </div>
         <a href="{{ route('admin.customers.create') }}" 
@@ -23,13 +23,13 @@
     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
         <form method="GET" action="{{ route('admin.customers.index') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
             <div>
-                <label class="block font-bold text-slate-600 mb-1">Search Customer</label>
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Name, contact person, phone..."
+                <label class="block font-bold text-slate-600 mb-1">Search Customer / Company</label>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Customer name, company, phone, email..."
                        class="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
             </div>
 
             <div>
-                <label class="block font-bold text-slate-600 mb-1">Company / Entity</label>
+                <label class="block font-bold text-slate-600 mb-1">Company</label>
                 <select name="company_id" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     <option value="">All Companies</option>
                     @foreach($companies as $c)

@@ -30,13 +30,13 @@
     <div class="border-2 border-slate-900 p-4 mb-4">
         <div class="flex items-start justify-between border-b-2 border-slate-900 pb-3 mb-3">
             <div>
-                <h1 class="text-xl font-extrabold tracking-tight uppercase">{{ $report->company->name }}</h1>
-                <p class="text-[11px] text-slate-600 max-w-lg mt-0.5">{{ $report->company->report_header_info ?? $report->company->address }}</p>
+                <h1 class="text-xl font-extrabold tracking-tight uppercase">{{ $report->company->legal_name ?: $report->company->name }}</h1>
+                <p class="text-[11px] text-slate-600 max-w-lg mt-0.5">{{ $report->company->report_header_info ?? ($report->company->certification_info ? $report->company->certification_info . ' | ' . $report->company->website : $report->company->address) }}</p>
                 <p class="text-[10px] text-slate-500">Phone: {{ $report->company->phone ?? '—' }} | Email: {{ $report->company->email ?? '—' }}</p>
             </div>
             <div class="text-right">
                 <span class="inline-block px-3 py-1 bg-slate-900 text-white font-extrabold text-sm uppercase tracking-wider rounded">
-                    INSTALLATION: PCU & COMMISSIONING
+                    INSTALLATION & COMMISSIONING
                 </span>
                 <p class="font-mono font-bold text-xs mt-1">NO: {{ $report->report_number }}</p>
                 @if($report->service)
@@ -52,20 +52,19 @@
                 <p class="font-bold text-sm text-slate-900">{{ $report->customer?->name ?? 'Installation Project' }}</p>
                 <p class="text-slate-700 mt-0.5">{{ $report->site?->name ?? 'Plant Site' }}</p>
                 <p class="text-slate-600 text-[11px]">{{ $sections['site_plant_info']['customer_address'] ?? ($report->site?->address ?? '—') }}</p>
+                @if($report->customer?->phone)
+                    <p class="text-slate-700 font-semibold text-[11px] mt-0.5">Phone: {{ $report->customer->phone }}</p>
+                @endif
             </div>
 
             <div class="border border-slate-300 p-2.5 rounded bg-slate-50/50 space-y-1">
                 <div class="flex justify-between">
-                    <span class="text-slate-500 font-semibold">Commissioning Date:</span>
+                    <span class="text-slate-500 font-semibold">Installation date:</span>
                     <strong class="text-slate-900">{{ $sections['site_plant_info']['service_date'] ?? '—' }}</strong>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-slate-500 font-semibold">Plant Capacity:</span>
+                    <span class="text-slate-500 font-semibold">Plant/System Capacity:</span>
                     <strong class="text-slate-900">{{ $sections['site_plant_info']['plant_capacity'] ?? '—' }}</strong>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-500 font-semibold">Engineer Name:</span>
-                    <span class="text-slate-900 font-semibold">{{ $sections['site_plant_info']['technician_name'] ?? $report->engineer->name }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-slate-500 font-semibold">System Type:</span>
@@ -78,7 +77,7 @@
     <!-- COMMISSIONING SPECIFICATIONS & CHECKS -->
     <div class="border border-slate-900 mb-4">
         <div class="bg-slate-900 text-white px-3 py-1 font-bold text-xs uppercase tracking-wider">
-            Inverter Performance & Commissioning Test Matrix
+            Plant / system Installation & Commisioning
         </div>
 
         <div class="p-3 space-y-3">
@@ -88,7 +87,7 @@
                     1. Power Conditioning Unit (PCU / Inverter)
                 </h3>
                 <div class="grid grid-cols-4 gap-2 mb-2 text-[11px]">
-                    <div><span class="text-slate-500 block text-[9px] uppercase">Make & Model</span> <strong>{{ $sections['pcu_installation']['pcu_make_model'] ?? '—' }}</strong></div>
+                    <div><span class="text-slate-500 block text-[9px] uppercase">Model & Type</span> <strong>{{ $sections['pcu_installation']['pcu_make_model'] ?? '—' }}</strong></div>
                     <div><span class="text-slate-500 block text-[9px] uppercase">Serial Number</span> <strong class="font-mono">{{ $sections['pcu_installation']['pcu_serial_no'] ?? '—' }}</strong></div>
                     <div><span class="text-slate-500 block text-[9px] uppercase">Voltage Rating</span> {{ $sections['pcu_installation']['volts_rating'] ?? '—' }}</div>
                     <div><span class="text-slate-500 block text-[9px] uppercase">Mounting</span> {{ $sections['pcu_installation']['mounting_details'] ?? '—' }}</div>
@@ -193,8 +192,7 @@
             <span class="font-bold text-[10px] uppercase text-slate-500">Commissioned By</span>
             <div class="my-auto">
                 <p class="font-bold text-sm text-slate-900">{{ $report->engineer->name }}</p>
-                <p class="text-[10px] text-slate-500">{{ $report->engineer->designation }}</p>
-                <p class="text-[9px] font-mono text-slate-400">ID: {{ $report->engineer->employee_code }}</p>
+                <p class="text-[10px] text-slate-500">Service Engineer / Technician</p>
             </div>
             <span class="text-[9px] text-slate-400 border-t pt-0.5">Engineer Signature & Date</span>
         </div>
@@ -217,13 +215,13 @@
 
         <!-- For Office Use -->
         <div class="p-3 flex flex-col justify-between h-28 bg-slate-50/60">
-            <span class="font-bold text-[10px] uppercase text-slate-500">For Office Use / Approved By</span>
+            <span class="font-bold text-[10px] uppercase text-slate-500">Verified by</span>
             <div class="my-auto">
-                <p class="font-bold text-sm text-slate-900">{{ $report->reviewer?->name ?? 'Authorized Signatory' }}</p>
+                <p class="font-bold text-sm text-slate-900">{{ $report->reviewer?->name ?? 'Admin Operations' }}</p>
                 <p class="text-[10px] text-emerald-700 font-semibold">{{ $report->isApproved() ? 'STATUS: APPROVED' : 'STATUS: ' . strtoupper($report->status) }}</p>
                 <p class="text-[9px] text-slate-400">{{ $report->approved_at?->format('d M Y, h:i A') }}</p>
             </div>
-            <span class="text-[9px] text-slate-400 border-t pt-0.5">Operations Director</span>
+            <span class="text-[9px] text-slate-400 border-t pt-0.5">Admin Operations</span>
         </div>
     </div>
 </body>

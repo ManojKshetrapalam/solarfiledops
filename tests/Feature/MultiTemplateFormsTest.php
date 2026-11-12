@@ -235,7 +235,7 @@ class MultiTemplateFormsTest extends TestCase
 
         $printResp3 = $this->get(route('admin.reports.print', $report3->id));
         $printResp3->assertOk();
-        $printResp3->assertSee('INSTALLATION: PCU & COMMISSIONING', false);
+        $printResp3->assertSee('INSTALLATION & COMMISSIONING', false);
 
         $apprResp3 = $this->post(route('admin.reports.approve', $report3->id));
         $apprResp3->assertSessionHas('success');

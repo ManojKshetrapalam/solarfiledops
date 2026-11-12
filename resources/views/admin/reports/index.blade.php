@@ -1,13 +1,13 @@
 @extends('layouts.admin')
 
-@section('title', 'Reports & Verification - SolarOps')
-@section('header_title', 'Field Service Reports')
+@section('title', 'Maintenance & Service Reports - Sun on Earth Solar Group')
+@section('header_title', 'Maintenance & Service Reports')
 
 @section('admin_content')
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h2 class="text-lg font-bold text-slate-900">Submitted Field Service Reports</h2>
+            <h2 class="text-lg font-bold text-slate-900">Submitted Reports</h2>
             <p class="text-xs text-slate-500">Verify digital inspection reports, inspect photographs, approve completed work, or request field corrections.</p>
         </div>
     </div>
@@ -34,7 +34,7 @@
             </div>
 
             <div>
-                <label class="block font-bold text-slate-600 mb-1">Company / Entity</label>
+                <label class="block font-bold text-slate-600 mb-1">Company</label>
                 <select name="company_id" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     <option value="">All Companies</option>
                     @foreach($companies as $c)
